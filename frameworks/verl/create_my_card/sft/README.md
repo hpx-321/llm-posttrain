@@ -201,3 +201,106 @@ python3 export_renderable_a2ui.py \
   --raw-input-file /path/to/raw_compact_dsl.jsonl \
   --output-dir /path/to/retry-output
 ```
+
+该入口不计算任何评测指标。
+
+## 训练后 Benchmark
+
+合并后的 Hugging Face 模型可以从两个维度评测，二者应同时保留：
+
+- 业务质量：输入真实 `TaskSpec`，生成 Design Compact DSL，并验证能否转换为可渲染 A2UI。
+- 服务性能：启动 vLLM OpenAI 兼容服务后，用 vLLM `v0.8.0` 自带的
+  `benchmarks/benchmark_serving.py` 测 TTFT、TPOT、端到端延迟和吞吐。
+
+Qwen3.6-27B 有 24 个 attention heads，因此 tensor parallel size 必须整除 24。
+16 张卡不能使用 `TP=16`；先使用 `TP=8` 验证单个副本，再用两个 `TP=8` 副本做线上
+并发扩展。
+
+### 业务质量与离线延迟
+
+`benchmark_create_my_card.py` 复用训练时的 system prompt、Qwen3.6 chat template、
+`enable_thinking=false` 和 Compact DSL -> A2UI 转换器。每条样本都会记录原始 DSL、
+prompt/completion token、生成延迟、成功状态和失败原因。
+
+```bash
+cd /workspace/hql/llm-posttrain/frameworks/verl/create_my_card/sft
+
+python3 benchmark_create_my_card.py \
+  --model-path /mnt/data/models/qwen36-27b-create-my-card-sft-v1-step15 \
+  --input-file data/parquet/test.parquet \
+  --output-dir /mnt/data/outputs/create-my-card/benchmark-tp8-b1 \
+  --tensor-parallel-size 8 \
+  --batch-size 1 \
+  --max-model-len 4096 \
+  --max-new-tokens 1536
+```
+
+`--batch-size 1` 用于观察逐样本离线延迟；吞吐测试可逐次使用 `2`、`4`、`8`、`16`，
+并且每次指定一个新的 `--output-dir`。
+
+输出目录包含：
+
+```text
+benchmark-tp8-b1/
+├── benchmark_report.json   # 成功率、失败分类、token/延迟分位数、吞吐、模型加载耗时
+├── samples.jsonl           # 每条样本的 token、latency、ok、error 和失败分类
+└── raw_compact_dsl.jsonl   # 每条样本的原始模型输出
+```
+
+终端会打印业务质量摘要；使用 `samples.jsonl` 查看具体样本。例如：
+
+```bash
+cat /mnt/data/outputs/create-my-card/benchmark-tp8-b1/samples.jsonl
+```
+
+### vLLM 在线服务性能
+
+在模型所在的 vLLM `v0.8.0` 容器中，先启动一个 TP=8 的 OpenAI 兼容服务：
+
+```bash
+export MODEL=/mnt/data/models/qwen36-27b-create-my-card-sft-v1-step15
+
+vllm serve "$MODEL" \
+  --served-model-name create-my-card-sft \
+  --tensor-parallel-size 8 \
+  --dtype bfloat16 \
+  --max-model-len 4096 \
+  --gpu-memory-utilization 0.90 \
+  --trust-remote-code \
+  --disable-log-requests
+```
+
+另开一个 shell，在 vLLM 源码根目录执行以下命令。该命令用随机长度请求测服务器性能，
+不评估 CreateMyCard 的业务正确性：
+
+```bash
+mkdir -p /mnt/data/benchmarks
+
+python benchmarks/benchmark_serving.py \
+  --backend vllm \
+  --model "$MODEL" \
+  --served-model-name create-my-card-sft \
+  --dataset-name random \
+  --random-input-len 2048 \
+  --random-output-len 512 \
+  --num-prompts 200 \
+  --request-rate inf \
+  --max-concurrency 32 \
+  --percentile-metrics ttft,tpot,itl,e2el \
+  --metric-percentiles 50,90,95,99 \
+  --trust-remote-code \
+  --save-result \
+  --save-detailed \
+  --result-dir /mnt/data/benchmarks \
+  --result-filename tp8-in2048-out512-c32.json \
+  --metadata tp=8 input=2048 output=512 concurrency=32
+```
+
+终端会打印 successful requests、请求吞吐、输出 token 吞吐、总 token 吞吐，以及
+TTFT、TPOT、ITL、E2E latency 的均值、中位数和指定分位数。`--save-detailed` 会将
+逐请求的 `input_lens`、`output_lens`、`ttfts`、`itls`、`generated_texts` 和 `errors`
+写入指定 JSON 文件。
+
+建议固定输入/输出长度后，依次测试 `--max-concurrency 1,2,4,8,16,32,64`。`--request-rate inf`
+测极限吞吐；使用有限值（例如 `--request-rate 2`、`5`、`10`）可模拟稳定到达的线上流量，
+并观察 P95/P99 延迟和吞吐的拐点。
