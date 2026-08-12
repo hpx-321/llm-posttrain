@@ -20,6 +20,7 @@ DEFAULT_TASKSPEC = BASE_DIR / "data" / "source" / "taskspec.json"
 DEFAULT_COMPACT_DSL = BASE_DIR / "data" / "source" / "design_compact_dsl.jsonl"
 DEFAULT_OUTPUT_DIR = BASE_DIR / "data" / "parquet"
 SCHEMA_VERSION = "create-my-card-sft/v1"
+VALIDATION_COUNT_MULTIPLE = 32
 
 
 class DataValidationError(ValueError):
@@ -48,7 +49,10 @@ def parse_args() -> argparse.Namespace:
         "--validation-ratio",
         type=float,
         default=0.05,
-        help="Fraction reserved for validation. Use 0 to create an empty validation split.",
+        help=(
+            "Target fraction reserved for validation. A positive target is aligned to the nearest "
+            f"{VALIDATION_COUNT_MULTIPLE} samples; use 0 to create an empty validation split."
+        ),
     )
     parser.add_argument("--seed", type=int, default=42)
     return parser.parse_args()
@@ -205,15 +209,27 @@ def build_row(
 def split_rows(
     rows: list[dict[str, Any]], validation_ratio: float, seed: int
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Split rows deterministically and align a non-empty validation split to 32 samples."""
     if not 0 <= validation_ratio < 1:
         raise DataValidationError("validation ratio must be in the range [0, 1)")
     if validation_ratio == 0:
         return rows, []
-    if len(rows) < 2:
-        raise DataValidationError("at least two samples are required when validation ratio is greater than 0")
+    minimum_split_size = VALIDATION_COUNT_MULTIPLE * 2
+    if len(rows) < minimum_split_size:
+        raise DataValidationError(
+            f"at least {minimum_split_size} samples are required to keep both training and "
+            f"validation splits at or above {VALIDATION_COUNT_MULTIPLE} samples"
+        )
 
-    validation_count = max(1, round(len(rows) * validation_ratio))
-    validation_count = min(validation_count, len(rows) - 1)
+    target_count = len(rows) * validation_ratio
+    validation_count = (
+        int(target_count + VALIDATION_COUNT_MULTIPLE / 2) // VALIDATION_COUNT_MULTIPLE
+    ) * VALIDATION_COUNT_MULTIPLE
+    validation_count = max(VALIDATION_COUNT_MULTIPLE, validation_count)
+    max_validation_count = (
+        (len(rows) - VALIDATION_COUNT_MULTIPLE) // VALIDATION_COUNT_MULTIPLE
+    ) * VALIDATION_COUNT_MULTIPLE
+    validation_count = min(validation_count, max_validation_count)
     shuffled_ids = [row["id"] for row in rows]
     random.Random(seed).shuffle(shuffled_ids)
     validation_ids = set(shuffled_ids[:validation_count])
@@ -331,6 +347,8 @@ def build_dataset(
         "thinkingMode": False,
         "systemPromptIncluded": bool(system_prompt),
         "validationRatio": validation_ratio,
+        "effectiveValidationRatio": len(validation_rows) / len(rows),
+        "validationCountMultiple": VALIDATION_COUNT_MULTIPLE,
         "seed": seed,
         "sources": {
             "systemPrompt": {

@@ -8,31 +8,23 @@ PROJECT_ROOT=$(cd -- "${SCRIPT_DIR}/../../../.." && pwd)
 
 MODEL_PATH=${MODEL_PATH:-/mnt/model/Qwen3.6-27B}
 DATA_DIR=${DATA_DIR:-${SCRIPT_DIR}/data/parquet}
+SFT_DATASET_PATH=${SFT_DATASET_PATH:-${SCRIPT_DIR}/qwen36_sft_dataset.py}
 SAVE_PATH=${SAVE_PATH:-/mnt/data/checkpoints/qwen36-27b-create-my-card-sft}
-TOKEN_REPORT=${TOKEN_REPORT:-${DATA_DIR}/token_stats.json}
 OOM_PROBE_FILE=${OOM_PROBE_FILE:-${DATA_DIR}/oom_probe.parquet}
 TRAIN_DEVICE=${TRAIN_DEVICE:-npu}
 
 DRY_RUN=${DRY_RUN:-1}
 DRY_RUN_STEPS=${DRY_RUN_STEPS:-2}
-RUN_TOKEN_PREFLIGHT=${RUN_TOKEN_PREFLIGHT:-1}
-PROBE_ROWS=${PROBE_ROWS:-256}
-PROBE_POOL_SIZE=${PROBE_POOL_SIZE:-8}
 
 NPROC_PER_NODE=${NPROC_PER_NODE:-}
 MASTER_ADDR=${MASTER_ADDR:-127.0.0.1}
 MASTER_PORT=${MASTER_PORT:-29500}
-SP_SIZE=${SP_SIZE:-auto}
+SP_SIZE=${SP_SIZE:-1}
 TRAIN_BATCH_SIZE=${TRAIN_BATCH_SIZE:-}
 MICRO_BATCH_SIZE_PER_GPU=${MICRO_BATCH_SIZE_PER_GPU:-1}
 
-MAX_PROMPT_TOKENS=${MAX_PROMPT_TOKENS:-24576}
-MAX_OUTPUT_TOKENS=${MAX_OUTPUT_TOKENS:-8192}
-HARD_MAX_TOTAL_TOKENS=${HARD_MAX_TOTAL_TOKENS:-32768}
-MIN_MAX_LENGTH=${MIN_MAX_LENGTH:-2048}
-LENGTH_ALIGNMENT=${LENGTH_ALIGNMENT:-256}
-MAX_LENGTH=${MAX_LENGTH:-auto}
-MAX_TOKEN_LEN_PER_GPU=${MAX_TOKEN_LEN_PER_GPU:-auto}
+MAX_LENGTH=${MAX_LENGTH:-4096}
+MAX_TOKEN_LEN_PER_GPU=${MAX_TOKEN_LEN_PER_GPU:-8192}
 
 LORA_RANK=${LORA_RANK:-0}
 LORA_ALPHA=${LORA_ALPHA:-64}
@@ -81,19 +73,18 @@ validate_bool() {
 }
 
 [[ -d "${MODEL_PATH}" ]] || fail "MODEL_PATH does not exist: ${MODEL_PATH}"
+[[ -f "${SFT_DATASET_PATH}" ]] || fail "SFT_DATASET_PATH does not exist: ${SFT_DATASET_PATH}"
 [[ -f "${DATA_DIR}/train.parquet" ]] || fail "missing ${DATA_DIR}/train.parquet"
 [[ -f "${DATA_DIR}/validation.parquet" ]] || fail "missing ${DATA_DIR}/validation.parquet"
 
 case "${DRY_RUN}" in 0|1) ;; *) fail "DRY_RUN must be 0 or 1" ;; esac
-case "${RUN_TOKEN_PREFLIGHT}" in 0|1) ;; *) fail "RUN_TOKEN_PREFLIGHT must be 0 or 1" ;; esac
 case "${TRAIN_DEVICE}" in cuda|npu) ;; *) fail "TRAIN_DEVICE must be cuda or npu" ;; esac
 validate_bool PARAM_OFFLOAD "${PARAM_OFFLOAD}"
 validate_bool OPTIMIZER_OFFLOAD "${OPTIMIZER_OFFLOAD}"
 validate_bool ACTIVATION_OFFLOAD "${ACTIVATION_OFFLOAD}"
 validate_bool USE_TORCH_COMPILE "${USE_TORCH_COMPILE}"
 
-for value_name in DRY_RUN_STEPS PROBE_ROWS PROBE_POOL_SIZE MICRO_BATCH_SIZE_PER_GPU \
-  MAX_PROMPT_TOKENS MAX_OUTPUT_TOKENS HARD_MAX_TOTAL_TOKENS MIN_MAX_LENGTH LENGTH_ALIGNMENT; do
+for value_name in DRY_RUN_STEPS MICRO_BATCH_SIZE_PER_GPU MAX_LENGTH MAX_TOKEN_LEN_PER_GPU SP_SIZE; do
   value=${!value_name}
   is_positive_int "${value}" || fail "${value_name} must be a positive integer, got: ${value}"
 done
@@ -116,88 +107,13 @@ PY
 fi
 is_positive_int "${NPROC_PER_NODE}" || fail "NPROC_PER_NODE must be a positive integer"
 
-preflight_args=(
-  --model-path "${MODEL_PATH}"
-  --train-parquet "${DATA_DIR}/train.parquet"
-  --validation-parquet "${DATA_DIR}/validation.parquet"
-  --report "${TOKEN_REPORT}"
-  --max-prompt-tokens "${MAX_PROMPT_TOKENS}"
-  --max-output-tokens "${MAX_OUTPUT_TOKENS}"
-  --hard-max-total-tokens "${HARD_MAX_TOTAL_TOKENS}"
-  --length-alignment "${LENGTH_ALIGNMENT}"
-  --minimum-max-length "${MIN_MAX_LENGTH}"
-)
-if [[ "${DRY_RUN}" == "1" ]]; then
-  preflight_args+=(
-    --probe-output "${OOM_PROBE_FILE}"
-    --probe-rows "${PROBE_ROWS}"
-    --probe-pool-size "${PROBE_POOL_SIZE}"
-  )
-fi
-
-if [[ "${RUN_TOKEN_PREFLIGHT}" == "1" ]]; then
-  python3 "${SCRIPT_DIR}/analyze_tokens.py" "${preflight_args[@]}"
-else
-  [[ -f "${TOKEN_REPORT}" ]] || fail "RUN_TOKEN_PREFLIGHT=0 requires existing ${TOKEN_REPORT}"
-fi
-
-read -r OBSERVED_MAX_TOTAL RECOMMENDED_MAX_LENGTH MODEL_CONTEXT_LENGTH < <(
-  python3 - "${TOKEN_REPORT}" <<'PY'
-import json
-import sys
-
-report = json.load(open(sys.argv[1], encoding="utf-8"))
-print(
-    report["observedMaxTotalTokens"],
-    report["recommendedMaxLength"],
-    report.get("modelContextLength") or 0,
-)
-PY
-)
-
-if [[ "${MAX_LENGTH}" == "auto" ]]; then
-  MAX_LENGTH=${RECOMMENDED_MAX_LENGTH}
-else
-  is_positive_int "${MAX_LENGTH}" || fail "MAX_LENGTH must be auto or a positive integer"
-fi
-((MAX_LENGTH >= OBSERVED_MAX_TOTAL)) || fail \
-  "MAX_LENGTH=${MAX_LENGTH} is smaller than observed maximum ${OBSERVED_MAX_TOTAL}; truncation is forbidden"
-if ((MODEL_CONTEXT_LENGTH > 0 && MAX_LENGTH > MODEL_CONTEXT_LENGTH)); then
-  fail "MAX_LENGTH=${MAX_LENGTH} exceeds model context ${MODEL_CONTEXT_LENGTH}"
-fi
-
-if [[ "${SP_SIZE}" == "auto" ]]; then
-  desired_sp=1
-  if ((MAX_LENGTH > 16384)); then
-    desired_sp=4
-  elif ((MAX_LENGTH > 8192)); then
-    desired_sp=2
-  fi
-  SP_SIZE=1
-  for candidate in 4 2 1; do
-    if ((candidate <= desired_sp && candidate <= NPROC_PER_NODE && NPROC_PER_NODE % candidate == 0)); then
-      SP_SIZE=${candidate}
-      break
-    fi
-  done
-else
-  is_positive_int "${SP_SIZE}" || fail "SP_SIZE must be auto or a positive integer"
-fi
 ((NPROC_PER_NODE % SP_SIZE == 0)) || fail \
   "NPROC_PER_NODE=${NPROC_PER_NODE} must be divisible by SP_SIZE=${SP_SIZE}"
 DP_SIZE=$((NPROC_PER_NODE / SP_SIZE))
 
-if [[ "${MAX_TOKEN_LEN_PER_GPU}" == "auto" ]]; then
-  per_device_unaligned=$(( (MAX_LENGTH + SP_SIZE - 1) / SP_SIZE ))
-  MAX_TOKEN_LEN_PER_GPU=$((
-    ((per_device_unaligned + LENGTH_ALIGNMENT - 1) / LENGTH_ALIGNMENT) * LENGTH_ALIGNMENT
-  ))
-fi
-is_positive_int "${MAX_TOKEN_LEN_PER_GPU}" || fail \
-  "MAX_TOKEN_LEN_PER_GPU must be auto or a positive integer"
 EFFECTIVE_MICRO_TOKEN_BUDGET=$((MAX_TOKEN_LEN_PER_GPU * SP_SIZE))
-((EFFECTIVE_MICRO_TOKEN_BUDGET >= OBSERVED_MAX_TOTAL)) || fail \
-  "MAX_TOKEN_LEN_PER_GPU * SP_SIZE is below the longest sample"
+((EFFECTIVE_MICRO_TOKEN_BUDGET >= MAX_LENGTH)) || fail \
+  "MAX_TOKEN_LEN_PER_GPU * SP_SIZE must be at least MAX_LENGTH"
 
 if [[ -z "${TRAIN_BATCH_SIZE}" ]]; then
   TRAIN_BATCH_SIZE=$((DP_SIZE * 2))
@@ -225,13 +141,15 @@ else
 fi
 
 if [[ "${DRY_RUN}" == "1" ]]; then
-  required_probe_rows=$((TRAIN_BATCH_SIZE * DRY_RUN_STEPS))
-  ((PROBE_ROWS >= required_probe_rows)) || fail \
-    "PROBE_ROWS=${PROBE_ROWS} is below TRAIN_BATCH_SIZE*DRY_RUN_STEPS=${required_probe_rows}"
-  [[ -f "${OOM_PROBE_FILE}" ]] || fail "OOM probe was not created: ${OOM_PROBE_FILE}"
+  [[ -f "${OOM_PROBE_FILE}" ]] || fail \
+    "missing ${OOM_PROBE_FILE}; generate it with analyze_tokens.py before the dry run"
   TRAIN_FILE=${OOM_PROBE_FILE}
+  TRAINER_ENTRY=("${SCRIPT_DIR}/sft_dry_run.py")
+  CHECKPOINT_SUMMARY=disabled
 else
   TRAIN_FILE=${DATA_DIR}/train.parquet
+  TRAINER_ENTRY=(-m verl.trainer.sft_trainer)
+  CHECKPOINT_SUMMARY="after each epoch; keep latest ${MAX_CKPT_TO_KEEP}"
 fi
 
 case "${LOGGER}" in
@@ -253,14 +171,14 @@ exec > >(tee -a "${LOG_FILE}") 2>&1
 echo "============================================================"
 echo "Qwen3.6-27B CreateMyCard veRL SFT"
 echo "Model:                        ${MODEL_PATH}"
+echo "SFT dataset adapter:          ${SFT_DATASET_PATH}"
 echo "Train file:                   ${TRAIN_FILE}"
 echo "Validation:                   ${DATA_DIR}/validation.parquet"
 echo "Checkpoint:                   ${SAVE_PATH}"
 echo "Device processes / SP / DP:   ${NPROC_PER_NODE} / ${SP_SIZE} / ${DP_SIZE}"
-echo "Observed / configured length: ${OBSERVED_MAX_TOTAL} / ${MAX_LENGTH}"
-echo "Prompt / output hard limits:  ${MAX_PROMPT_TOKENS} / ${MAX_OUTPUT_TOKENS}"
-echo "Per-device token budget:      ${MAX_TOKEN_LEN_PER_GPU}"
-echo "Effective SP token budget:    ${EFFECTIVE_MICRO_TOKEN_BUDGET}"
+echo "Max sequence length:           ${MAX_LENGTH}"
+echo "Per-device token budget:       ${MAX_TOKEN_LEN_PER_GPU}"
+echo "Effective SP token budget:     ${EFFECTIVE_MICRO_TOKEN_BUDGET}"
 echo "Global / local / micro batch: ${TRAIN_BATCH_SIZE} / ${LOCAL_BATCH_SIZE} / ${MICRO_BATCH_SIZE_PER_GPU}"
 echo "Training mode:                ${TRAINING_MODE}"
 echo "LoRA:                         ${LORA_SUMMARY}"
@@ -269,7 +187,7 @@ echo "Param / optimizer offload:    ${PARAM_OFFLOAD} / ${OPTIMIZER_OFFLOAD}"
 echo "Activation offload:           ${ACTIVATION_OFFLOAD}"
 echo "Learning rate / epochs:       ${LEARNING_RATE} / ${TOTAL_EPOCHS}"
 echo "Dry run / steps:              ${DRY_RUN} / ${DRY_RUN_STEPS}"
-echo "Token report:                 ${TOKEN_REPORT}"
+echo "Checkpoint saving:            ${CHECKPOINT_SUMMARY}"
 echo "Log:                          ${LOG_FILE}"
 echo "============================================================"
 
@@ -280,7 +198,7 @@ if [[ "${DRY_RUN}" == "1" ]]; then
     trainer.save_freq=-1
     trainer.test_freq=-1
     trainer.resume_mode=disable
-    'checkpoint.save_contents=["model","extra"]'
+    'checkpoint.save_contents=[]'
   )
 else
   extra_args+=(
@@ -309,7 +227,7 @@ torchrun \
   --nproc_per_node="${NPROC_PER_NODE}" \
   --master_addr="${MASTER_ADDR}" \
   --master_port="${MASTER_PORT}" \
-  -m verl.trainer.sft_trainer \
+  "${TRAINER_ENTRY[@]}" \
   "data.train_files=${TRAIN_FILE}" \
   "data.val_files=${DATA_DIR}/validation.parquet" \
   "data.train_batch_size=${TRAIN_BATCH_SIZE}" \
@@ -319,11 +237,10 @@ torchrun \
   data.use_dynamic_bsz=true \
   data.messages_key=messages \
   data.enable_thinking_key=enable_thinking \
-  data.enable_thinking_default=false \
-  'data.apply_chat_template_kwargs={enable_thinking:false}' \
+  "data.custom_cls.path=${SFT_DATASET_PATH}" \
+  data.custom_cls.name=CreateMyCardSFTDataset \
   data.pad_mode=no_padding \
   data.truncation=error \
-  data.ignore_input_ids_mismatch=false \
   data.num_workers=2 \
   model=hf_model \
   "model.path=${MODEL_PATH}" \

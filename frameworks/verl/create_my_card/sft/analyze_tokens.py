@@ -16,6 +16,9 @@ from typing import Any, Iterable, Mapping
 
 BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_DATA_DIR = BASE_DIR / "data" / "parquet"
+DEFAULT_MAX_PROMPT_TOKENS = 0
+DEFAULT_MAX_OUTPUT_TOKENS = 0
+DEFAULT_HARD_MAX_TOTAL_TOKENS = 0
 
 
 class TokenValidationError(ValueError):
@@ -42,9 +45,24 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_DATA_DIR / "validation.parquet",
     )
     parser.add_argument("--report", type=Path, default=DEFAULT_DATA_DIR / "token_stats.json")
-    parser.add_argument("--max-prompt-tokens", type=int, default=24_576)
-    parser.add_argument("--max-output-tokens", type=int, default=8_192)
-    parser.add_argument("--hard-max-total-tokens", type=int, default=32_768)
+    parser.add_argument(
+        "--max-prompt-tokens",
+        type=int,
+        default=DEFAULT_MAX_PROMPT_TOKENS,
+        help="Optional prompt-token admission limit; 0 disables it.",
+    )
+    parser.add_argument(
+        "--max-output-tokens",
+        type=int,
+        default=DEFAULT_MAX_OUTPUT_TOKENS,
+        help="Optional assistant-token admission limit; 0 disables it.",
+    )
+    parser.add_argument(
+        "--hard-max-total-tokens",
+        type=int,
+        default=DEFAULT_HARD_MAX_TOTAL_TOKENS,
+        help="Optional total-token admission limit; 0 disables it.",
+    )
     parser.add_argument("--length-alignment", type=int, default=256)
     parser.add_argument("--minimum-max-length", type=int, default=2_048)
     parser.add_argument("--probe-output", type=Path)
@@ -360,6 +378,13 @@ def main() -> None:
     ):
         if value <= 0:
             raise SystemExit(f"error: {label} must be positive")
+    for label, value in (
+        ("--max-prompt-tokens", args.max_prompt_tokens),
+        ("--max-output-tokens", args.max_output_tokens),
+        ("--hard-max-total-tokens", args.hard_max_total_tokens),
+    ):
+        if value < 0:
+            raise SystemExit(f"error: {label} must be non-negative")
 
     try:
         from transformers import AutoConfig, AutoTokenizer

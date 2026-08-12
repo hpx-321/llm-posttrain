@@ -719,6 +719,7 @@ def convert_compact_dsl_to_a2ui(
     rows = _parse_compact_rows(compact_dsl)
     components, data_rows = _validate_component_tree(rows)
     _validate_compact_root_dimensions(components[0], size)
+    surface_dimensions = _surface_dimensions(size, protocol_profile)
 
     normalized_components = [_normalize_component(row) for row in components]
     data_model = _build_data_model(data_rows)
@@ -744,6 +745,8 @@ def convert_compact_dsl_to_a2ui(
             "createSurface": {
                 "surfaceId": surface_id,
                 "catalogId": _A2UI_FORM_CATALOG_ID,
+                "width": surface_dimensions["width"],
+                "height": surface_dimensions["height"],
             },
         },
         {
@@ -848,7 +851,7 @@ def _extract_top_level_array_rows(body: str) -> list[str]:
     in_string = False
     escaped = False
 
-    for char in body:
+    for index, char in enumerate(body):
         if not expected_closers:
             if char == "[":
                 _validate_text_between_rows(outside, bool(rows))
@@ -880,6 +883,9 @@ def _extract_top_level_array_rows(body: str) -> list[str]:
         if char not in {"]", "}"}:
             continue
         if char != expected_closers[-1]:
+            if _is_redundant_json_closer(body, index, expected_closers[-1]):
+                current.pop()
+                continue
             raise CompactDslConversionError(
                 "Compact DSL contains mismatched JSON delimiters."
             )
@@ -899,6 +905,15 @@ def _extract_top_level_array_rows(body: str) -> list[str]:
     if not rows:
         raise CompactDslConversionError("Compact DSL output is empty.")
     return rows
+
+
+def _is_redundant_json_closer(text: str, index: int, expected_closer: str) -> bool:
+    """Return whether a mismatched closer is immediately followed by the right one."""
+    for following in text[index + 1 :]:
+        if following.isspace():
+            continue
+        return following == expected_closer
+    return False
 
 
 def _validate_text_between_rows(outside: list[str], has_previous_row: bool) -> None:
