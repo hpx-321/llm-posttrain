@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import random
@@ -19,7 +18,6 @@ DEFAULT_SYSTEM_PROMPT = BASE_DIR / "data" / "source" / "system_prompt.md"
 DEFAULT_TASKSPEC = BASE_DIR / "data" / "source" / "taskspec.json"
 DEFAULT_COMPACT_DSL = BASE_DIR / "data" / "source" / "design_compact_dsl.jsonl"
 DEFAULT_OUTPUT_DIR = BASE_DIR / "data" / "parquet"
-SCHEMA_VERSION = "create-my-card-sft/v1"
 VALIDATION_COUNT_MULTIPLE = 32
 
 
@@ -290,36 +288,6 @@ def write_parquet(rows: list[dict[str, Any]], output_path: Path) -> None:
             temporary_path.unlink()
 
 
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def write_json_atomic(payload: dict[str, Any], output_path: Path) -> None:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    serialized = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
-    temporary_path: Path | None = None
-    try:
-        with tempfile.NamedTemporaryFile(
-            mode="w",
-            encoding="utf-8",
-            newline="\n",
-            prefix=f".{output_path.name}.",
-            suffix=".tmp",
-            dir=output_path.parent,
-            delete=False,
-        ) as temporary:
-            temporary.write(serialized)
-            temporary_path = Path(temporary.name)
-        os.replace(temporary_path, output_path)
-    finally:
-        if temporary_path is not None and temporary_path.exists():
-            temporary_path.unlink()
-
-
 def build_dataset(
     *,
     system_prompt_path: Path,
@@ -342,50 +310,19 @@ def build_dataset(
     write_parquet(train_rows, train_path)
     write_parquet(validation_rows, validation_path)
 
-    manifest = {
-        "schemaVersion": SCHEMA_VERSION,
-        "thinkingMode": False,
-        "systemPromptIncluded": bool(system_prompt),
-        "validationRatio": validation_ratio,
-        "effectiveValidationRatio": len(validation_rows) / len(rows),
-        "validationCountMultiple": VALIDATION_COUNT_MULTIPLE,
-        "seed": seed,
-        "sources": {
-            "systemPrompt": {
-                "path": str(system_prompt_path.resolve()),
-                "sha256": sha256_file(system_prompt_path),
-            },
-            "taskSpec": {
-                "path": str(taskspec_path.resolve()),
-                "sha256": sha256_file(taskspec_path),
-            },
-            "designCompactDsl": {
-                "path": str(compact_dsl_path.resolve()),
-                "sha256": sha256_file(compact_dsl_path),
-            },
+    return {
+        "train": {"path": str(train_path.resolve()), "count": len(train_rows)},
+        "validation": {
+            "path": str(validation_path.resolve()),
+            "count": len(validation_rows),
         },
-        "splits": {
-            "train": {
-                "count": len(train_rows),
-                "ids": [row["id"] for row in train_rows],
-                "sha256": sha256_file(train_path),
-            },
-            "validation": {
-                "count": len(validation_rows),
-                "ids": [row["id"] for row in validation_rows],
-                "sha256": sha256_file(validation_path),
-            },
-        },
-        "parquetColumns": ["id", "messages", "enable_thinking"],
     }
-    write_json_atomic(manifest, output_dir / "manifest.json")
-    return manifest
 
 
 def main() -> None:
     args = parse_args()
     try:
-        manifest = build_dataset(
+        splits = build_dataset(
             system_prompt_path=args.system_prompt,
             taskspec_path=args.taskspec,
             compact_dsl_path=args.compact_dsl,
@@ -397,7 +334,7 @@ def main() -> None:
         raise SystemExit(f"error: {exc}") from exc
 
     print(f"Saved veRL SFT parquet files to: {args.output_dir.resolve()}")
-    print(json.dumps(manifest["splits"], ensure_ascii=False, indent=2))
+    print(json.dumps(splits, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

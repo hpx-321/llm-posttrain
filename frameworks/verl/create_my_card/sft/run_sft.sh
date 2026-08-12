@@ -26,9 +26,6 @@ MICRO_BATCH_SIZE_PER_GPU=${MICRO_BATCH_SIZE_PER_GPU:-1}
 MAX_LENGTH=${MAX_LENGTH:-4096}
 MAX_TOKEN_LEN_PER_GPU=${MAX_TOKEN_LEN_PER_GPU:-8192}
 
-LORA_RANK=${LORA_RANK:-0}
-LORA_ALPHA=${LORA_ALPHA:-64}
-LORA_TARGET_MODULES=${LORA_TARGET_MODULES:-all-linear}
 LEARNING_RATE=${LEARNING_RATE:-}
 TOTAL_EPOCHS=${TOTAL_EPOCHS:-3}
 WEIGHT_DECAY=${WEIGHT_DECAY:-0.01}
@@ -37,11 +34,8 @@ WARMUP_RATIO=${WARMUP_RATIO:-0.03}
 PARAM_OFFLOAD=${PARAM_OFFLOAD:-false}
 OPTIMIZER_OFFLOAD=${OPTIMIZER_OFFLOAD:-false}
 ACTIVATION_OFFLOAD=${ACTIVATION_OFFLOAD:-false}
-USE_TORCH_COMPILE=${USE_TORCH_COMPILE:-false}
-FSDP_STRATEGY=${FSDP_STRATEGY:-fsdp}
-RESUME_MODE=${RESUME_MODE:-disable}
-LOGGER=${LOGGER:-console}
-MAX_CKPT_TO_KEEP=${MAX_CKPT_TO_KEEP:-2}
+MAX_CKPT_TO_KEEP=${MAX_CKPT_TO_KEEP:-1}
+BEST_CKPT_MIN_DELTA=${BEST_CKPT_MIN_DELTA:-0}
 LOG_DIR=${LOG_DIR:-/mnt/data/logs/qwen36-27b-create-my-card-sft}
 PROJECT_NAME=${PROJECT_NAME:-qwen36-create-my-card-sft}
 EXPERIMENT_NAME=${EXPERIMENT_NAME:-qwen36-27b-full-sft}
@@ -61,15 +55,16 @@ is_positive_int() {
   [[ "$1" =~ ^[1-9][0-9]*$ ]]
 }
 
-is_nonnegative_int() {
-  [[ "$1" =~ ^[0-9]+$ ]]
-}
-
 validate_bool() {
   case "$2" in
     true|false) ;;
     *) fail "$1 must be true or false, got: $2" ;;
   esac
+}
+
+validate_nonnegative_number() {
+  [[ "$2" =~ ^([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?$ ]] || \
+    fail "$1 must be a non-negative finite number, got: $2"
 }
 
 [[ -d "${MODEL_PATH}" ]] || fail "MODEL_PATH does not exist: ${MODEL_PATH}"
@@ -82,15 +77,12 @@ case "${TRAIN_DEVICE}" in cuda|npu) ;; *) fail "TRAIN_DEVICE must be cuda or npu
 validate_bool PARAM_OFFLOAD "${PARAM_OFFLOAD}"
 validate_bool OPTIMIZER_OFFLOAD "${OPTIMIZER_OFFLOAD}"
 validate_bool ACTIVATION_OFFLOAD "${ACTIVATION_OFFLOAD}"
-validate_bool USE_TORCH_COMPILE "${USE_TORCH_COMPILE}"
+validate_nonnegative_number BEST_CKPT_MIN_DELTA "${BEST_CKPT_MIN_DELTA}"
 
-for value_name in DRY_RUN_STEPS MICRO_BATCH_SIZE_PER_GPU MAX_LENGTH MAX_TOKEN_LEN_PER_GPU SP_SIZE; do
+for value_name in DRY_RUN_STEPS MICRO_BATCH_SIZE_PER_GPU MAX_LENGTH MAX_TOKEN_LEN_PER_GPU SP_SIZE TOTAL_EPOCHS MAX_CKPT_TO_KEEP; do
   value=${!value_name}
   is_positive_int "${value}" || fail "${value_name} must be a positive integer, got: ${value}"
 done
-is_nonnegative_int "${LORA_RANK}" || fail "LORA_RANK must be a non-negative integer"
-is_positive_int "${LORA_ALPHA}" || fail "LORA_ALPHA must be a positive integer"
-
 if [[ -z "${NPROC_PER_NODE}" ]]; then
   NPROC_PER_NODE=$(TRAIN_DEVICE="${TRAIN_DEVICE}" python3 - <<'PY'
 import os
@@ -126,18 +118,7 @@ LOCAL_BATCH_SIZE=$((TRAIN_BATCH_SIZE / DP_SIZE))
   "local batch ${LOCAL_BATCH_SIZE} must be divisible by micro batch ${MICRO_BATCH_SIZE_PER_GPU}"
 
 if [[ -z "${LEARNING_RATE}" ]]; then
-  if ((LORA_RANK > 0)); then
-    LEARNING_RATE=1e-5
-  else
-    LEARNING_RATE=1e-6
-  fi
-fi
-if ((LORA_RANK > 0)); then
-  TRAINING_MODE=LoRA
-  LORA_SUMMARY="rank=${LORA_RANK}, alpha=${LORA_ALPHA}, targets=${LORA_TARGET_MODULES}"
-else
-  TRAINING_MODE=full-parameter
-  LORA_SUMMARY="disabled (rank=0)"
+  LEARNING_RATE=1e-6
 fi
 
 if [[ "${DRY_RUN}" == "1" ]]; then
@@ -147,21 +128,20 @@ if [[ "${DRY_RUN}" == "1" ]]; then
   TRAINER_ENTRY=("${SCRIPT_DIR}/sft_dry_run.py")
   CHECKPOINT_SUMMARY=disabled
 else
+  [[ -f "${SCRIPT_DIR}/best_sft_trainer.py" ]] || fail "missing best_sft_trainer.py"
   TRAIN_FILE=${DATA_DIR}/train.parquet
-  TRAINER_ENTRY=(-m verl.trainer.sft_trainer)
-  CHECKPOINT_SUMMARY="after each epoch; keep latest ${MAX_CKPT_TO_KEEP}"
+  TRAINER_ENTRY=("${SCRIPT_DIR}/best_sft_trainer.py")
+  CHECKPOINT_SUMMARY="save best model weights only; keep ${MAX_CKPT_TO_KEEP} improvement(s)"
 fi
 
-case "${LOGGER}" in
-  console) logger_config='["console"]' ;;
-  wandb) logger_config='["console","wandb"]' ;;
-  *) fail "LOGGER must be console or wandb" ;;
-esac
-case "${RESUME_MODE}" in disable|auto) ;; *) fail "RESUME_MODE must be disable or auto" ;; esac
+export BEST_CKPT_MIN_DELTA
 
-if [[ "${DRY_RUN}" == "0" && "${RESUME_MODE}" == "disable" ]] && \
-  compgen -G "${SAVE_PATH}/global_step_*" >/dev/null; then
-  fail "${SAVE_PATH} already contains checkpoints; use a new path or RESUME_MODE=auto"
+if [[ "${DRY_RUN}" == "0" ]] && \
+  { compgen -G "${SAVE_PATH}/global_step_*" >/dev/null || \
+    [[ -e "${SAVE_PATH}/latest_checkpointed_iteration.txt" ]] || \
+    [[ -e "${SAVE_PATH}/best_checkpointed_iteration.txt" ]] || \
+    [[ -e "${SAVE_PATH}/best_validation_metrics.json" ]]; }; then
+  fail "${SAVE_PATH} already contains checkpoint state; use a new SAVE_PATH"
 fi
 
 mkdir -p -- "${LOG_DIR}"
@@ -180,14 +160,14 @@ echo "Max sequence length:           ${MAX_LENGTH}"
 echo "Per-device token budget:       ${MAX_TOKEN_LEN_PER_GPU}"
 echo "Effective SP token budget:     ${EFFECTIVE_MICRO_TOKEN_BUDGET}"
 echo "Global / local / micro batch: ${TRAIN_BATCH_SIZE} / ${LOCAL_BATCH_SIZE} / ${MICRO_BATCH_SIZE_PER_GPU}"
-echo "Training mode:                ${TRAINING_MODE}"
-echo "LoRA:                         ${LORA_SUMMARY}"
+echo "Training mode:                full-parameter"
 echo "Gradient checkpointing:       true"
 echo "Param / optimizer offload:    ${PARAM_OFFLOAD} / ${OPTIMIZER_OFFLOAD}"
 echo "Activation offload:           ${ACTIVATION_OFFLOAD}"
 echo "Learning rate / epochs:       ${LEARNING_RATE} / ${TOTAL_EPOCHS}"
 echo "Dry run / steps:              ${DRY_RUN} / ${DRY_RUN_STEPS}"
 echo "Checkpoint saving:            ${CHECKPOINT_SUMMARY}"
+echo "Best-checkpoint min delta:    ${BEST_CKPT_MIN_DELTA}"
 echo "Log:                          ${LOG_FILE}"
 echo "============================================================"
 
@@ -206,16 +186,8 @@ else
     trainer.save_freq=after_each_epoch
     trainer.test_freq=after_each_epoch
     "trainer.max_ckpt_to_keep=${MAX_CKPT_TO_KEEP}"
-    "trainer.resume_mode=${RESUME_MODE}"
-    'checkpoint.save_contents=["model","optimizer","extra"]'
-  )
-fi
-
-lora_args=("model.lora_rank=${LORA_RANK}")
-if ((LORA_RANK > 0)); then
-  lora_args+=(
-    "model.lora_alpha=${LORA_ALPHA}"
-    "model.target_modules=${LORA_TARGET_MODULES}"
+    trainer.resume_mode=disable
+    'checkpoint.save_contents=["model"]'
   )
 fi
 
@@ -249,16 +221,16 @@ torchrun \
   "model.enable_activation_offload=${ACTIVATION_OFFLOAD}" \
   model.use_remove_padding=true \
   model.use_fused_kernels=false \
-  "${lora_args[@]}" \
+  model.lora_rank=0 \
   engine=fsdp \
-  "engine.strategy=${FSDP_STRATEGY}" \
+  engine.strategy=fsdp \
   engine.dtype=bfloat16 \
   engine.model_dtype=fp32 \
   engine.reshard_after_forward=true \
   "engine.ulysses_sequence_parallel_size=${SP_SIZE}" \
   "engine.param_offload=${PARAM_OFFLOAD}" \
   "engine.optimizer_offload=${OPTIMIZER_OFFLOAD}" \
-  "engine.use_torch_compile=${USE_TORCH_COMPILE}" \
+  engine.use_torch_compile=false \
   optim=fsdp \
   "optim.lr=${LEARNING_RATE}" \
   optim.lr_scheduler_type=cosine \
@@ -269,7 +241,7 @@ torchrun \
   "trainer.default_local_dir=${SAVE_PATH}" \
   "trainer.project_name=${PROJECT_NAME}" \
   "trainer.experiment_name=${EXPERIMENT_NAME}" \
-  "trainer.logger=${logger_config}" \
+  'trainer.logger=["console"]' \
   "trainer.device=${TRAIN_DEVICE}" \
   trainer.nnodes=1 \
   "trainer.n_gpus_per_node=${NPROC_PER_NODE}" \

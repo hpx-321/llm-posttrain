@@ -5,11 +5,14 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 PROJECT_ROOT=$(cd -- "${SCRIPT_DIR}/../../../.." && pwd)
 
 SAVE_PATH=${SAVE_PATH:-/mnt/data/checkpoints/qwen36-27b-create-my-card-sft-v1}
-CHECKPOINT_STEP=${CHECKPOINT_STEP:-latest}
+CHECKPOINT_STEP=${CHECKPOINT_STEP:-best}
 MERGED_MODEL=${MERGED_MODEL:-}
 
-tracker="${SAVE_PATH}/latest_checkpointed_iteration.txt"
-if [[ "${CHECKPOINT_STEP}" == "latest" ]]; then
+case "${CHECKPOINT_STEP}" in
+  best) tracker="${SAVE_PATH}/best_checkpointed_iteration.txt" ;;
+  *) tracker= ;;
+esac
+if [[ -n "${tracker}" ]]; then
   if [[ ! -f "${tracker}" ]]; then
     echo "Error: checkpoint tracker does not exist: ${tracker}" >&2
     exit 1
@@ -20,7 +23,7 @@ else
 fi
 
 if ! [[ "${step}" =~ ^[1-9][0-9]*$ ]]; then
-  echo "Error: CHECKPOINT_STEP must be latest or a positive integer, got: ${step}" >&2
+  echo "Error: CHECKPOINT_STEP must be best or a positive integer, got: ${step}" >&2
   exit 1
 fi
 

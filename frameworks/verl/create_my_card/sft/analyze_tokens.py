@@ -4,21 +4,19 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import math
 import os
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any, Iterable
+
+from qwen36_sft_dataset import SFTDataError, apply_template, validate_messages
 
 
 BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_DATA_DIR = BASE_DIR / "data" / "parquet"
-DEFAULT_MAX_PROMPT_TOKENS = 0
-DEFAULT_MAX_OUTPUT_TOKENS = 0
-DEFAULT_HARD_MAX_TOTAL_TOKENS = 0
 
 
 class TokenValidationError(ValueError):
@@ -45,24 +43,6 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_DATA_DIR / "validation.parquet",
     )
     parser.add_argument("--report", type=Path, default=DEFAULT_DATA_DIR / "token_stats.json")
-    parser.add_argument(
-        "--max-prompt-tokens",
-        type=int,
-        default=DEFAULT_MAX_PROMPT_TOKENS,
-        help="Optional prompt-token admission limit; 0 disables it.",
-    )
-    parser.add_argument(
-        "--max-output-tokens",
-        type=int,
-        default=DEFAULT_MAX_OUTPUT_TOKENS,
-        help="Optional assistant-token admission limit; 0 disables it.",
-    )
-    parser.add_argument(
-        "--hard-max-total-tokens",
-        type=int,
-        default=DEFAULT_HARD_MAX_TOTAL_TOKENS,
-        help="Optional total-token admission limit; 0 disables it.",
-    )
     parser.add_argument("--length-alignment", type=int, default=256)
     parser.add_argument("--minimum-max-length", type=int, default=2_048)
     parser.add_argument("--probe-output", type=Path)
@@ -71,62 +51,18 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def normalize_input_ids(tokenized: Any) -> list[int]:
-    if isinstance(tokenized, Mapping):
-        tokenized = tokenized.get("input_ids")
-    if hasattr(tokenized, "tolist"):
-        tokenized = tokenized.tolist()
-    if tokenized and isinstance(tokenized[0], list):
-        if len(tokenized) != 1:
-            raise TokenValidationError("chat template unexpectedly returned a batch")
-        tokenized = tokenized[0]
-    if not isinstance(tokenized, list) or not all(isinstance(value, int) for value in tokenized):
-        raise TokenValidationError(
-            f"chat template returned unsupported input_ids type: {type(tokenized).__name__}"
-        )
-    return tokenized
-
-
-def apply_template(tokenizer: Any, messages: list[dict[str, str]], *, generation: bool) -> list[int]:
-    tokenized = tokenizer.apply_chat_template(
-        messages,
-        tokenize=True,
-        add_generation_prompt=generation,
-        enable_thinking=False,
-    )
-    return normalize_input_ids(tokenized)
-
-
-def validate_messages(messages: Any, sample_id: str) -> list[dict[str, str]]:
-    if not isinstance(messages, list):
-        raise TokenValidationError(f"{sample_id}: messages must be a list")
-    roles = [message.get("role") if isinstance(message, dict) else None for message in messages]
-    if roles not in (["user", "assistant"], ["system", "user", "assistant"]):
-        raise TokenValidationError(
-            f"{sample_id}: roles must be user/assistant or system/user/assistant, got {roles}"
-        )
-    for index, message in enumerate(messages):
-        if not isinstance(message, dict):
-            raise TokenValidationError(f"{sample_id}: message {index} must be an object")
-        content = message.get("content")
-        if not isinstance(content, str) or not content.strip():
-            raise TokenValidationError(f"{sample_id}: {message.get('role')} content is empty")
-    assistant = messages[-1]["content"].lower()
-    if "<think>" in assistant or "</think>" in assistant:
-        raise TokenValidationError(f"{sample_id}: assistant label contains <think> tags")
-    return messages
-
-
 def analyze_row(row: dict[str, Any], tokenizer: Any, split: str, row_index: int) -> AnalyzedRow:
     sample_id = row.get("id")
     if not isinstance(sample_id, str) or not sample_id:
         raise TokenValidationError(f"{split} row {row_index}: id must be a non-empty string")
     if row.get("enable_thinking") is not False:
         raise TokenValidationError(f"{split}/{sample_id}: enable_thinking must be false")
-    messages = validate_messages(row.get("messages"), f"{split}/{sample_id}")
-
-    prompt_ids = apply_template(tokenizer, messages[:-1], generation=True)
-    full_ids = apply_template(tokenizer, messages, generation=False)
+    try:
+        messages = validate_messages(row.get("messages"), f"{split}/{sample_id}")
+        prompt_ids = apply_template(tokenizer, messages[:-1], generation=True)
+        full_ids = apply_template(tokenizer, messages, generation=False)
+    except SFTDataError as exc:
+        raise TokenValidationError(str(exc)) from exc
     if full_ids[: len(prompt_ids)] != prompt_ids:
         raise TokenValidationError(
             f"{split}/{sample_id}: training sequence does not start with the non-thinking inference prompt"
@@ -184,39 +120,6 @@ def detect_model_context_length(config: Any, tokenizer: Any) -> int | None:
     ]
     valid = [value for value in candidates if isinstance(value, int) and 0 < value < 10_000_000]
     return min(valid) if valid else None
-
-
-def collect_violations(
-    rows: Iterable[AnalyzedRow],
-    *,
-    max_prompt_tokens: int,
-    max_output_tokens: int,
-    hard_max_total_tokens: int,
-    model_context_length: int | None,
-) -> list[dict[str, Any]]:
-    violations: list[dict[str, Any]] = []
-    for row in rows:
-        reasons: list[str] = []
-        if max_prompt_tokens > 0 and row.prompt_tokens > max_prompt_tokens:
-            reasons.append("prompt")
-        if max_output_tokens > 0 and row.assistant_tokens > max_output_tokens:
-            reasons.append("assistant")
-        if hard_max_total_tokens > 0 and row.total_tokens > hard_max_total_tokens:
-            reasons.append("hard_total")
-        if model_context_length is not None and row.total_tokens > model_context_length:
-            reasons.append("model_context")
-        if reasons:
-            violations.append(
-                {
-                    "split": row.split,
-                    "id": row.sample_id,
-                    "promptTokens": row.prompt_tokens,
-                    "assistantTokens": row.assistant_tokens,
-                    "totalTokens": row.total_tokens,
-                    "reasons": reasons,
-                }
-            )
-    return violations
 
 
 def load_parquet(path: Path) -> tuple[list[dict[str, Any]], Any]:
@@ -304,22 +207,23 @@ def build_report(
     *,
     model_path: str,
     model_context_length: int | None,
-    chat_template_sha256: str,
-    max_prompt_tokens: int,
-    max_output_tokens: int,
-    hard_max_total_tokens: int,
     minimum_max_length: int,
     length_alignment: int,
 ) -> dict[str, Any]:
     observed_max = max(row.total_tokens for row in analyzed)
     recommended = max(minimum_max_length, align_up(observed_max, length_alignment))
-    violations = collect_violations(
-        analyzed,
-        max_prompt_tokens=max_prompt_tokens,
-        max_output_tokens=max_output_tokens,
-        hard_max_total_tokens=hard_max_total_tokens,
-        model_context_length=model_context_length,
-    )
+    violations = []
+    if model_context_length is not None:
+        violations = [
+            {
+                "split": row.split,
+                "id": row.sample_id,
+                "totalTokens": row.total_tokens,
+                "modelContextLength": model_context_length,
+            }
+            for row in analyzed
+            if row.total_tokens > model_context_length
+        ]
     splits: dict[str, Any] = {}
     for split in sorted({row.split for row in analyzed}):
         rows = [row for row in analyzed if row.split == split]
@@ -329,27 +233,11 @@ def build_report(
             "assistantTokens": summarize(row.assistant_tokens for row in rows),
             "totalTokens": summarize(row.total_tokens for row in rows),
         }
-    per_sample = [
-        {
-            "split": row.split,
-            "id": row.sample_id,
-            "promptTokens": row.prompt_tokens,
-            "assistantTokens": row.assistant_tokens,
-            "totalTokens": row.total_tokens,
-        }
-        for row in sorted(analyzed, key=lambda item: (item.split, item.sample_id))
-    ]
     longest = sorted(analyzed, key=lambda row: (-row.total_tokens, row.split, row.sample_id))[:10]
     return {
         "modelPath": model_path,
         "thinkingMode": False,
-        "chatTemplateSha256": chat_template_sha256,
         "modelContextLength": model_context_length,
-        "limits": {
-            "maxPromptTokens": max_prompt_tokens,
-            "maxAssistantTokens": max_output_tokens,
-            "hardMaxTotalTokens": hard_max_total_tokens,
-        },
         "recommendedMaxLength": recommended,
         "observedMaxTotalTokens": observed_max,
         "splits": splits,
@@ -364,7 +252,6 @@ def build_report(
             for row in longest
         ],
         "violations": violations,
-        "perSample": per_sample,
     }
 
 
@@ -378,14 +265,6 @@ def main() -> None:
     ):
         if value <= 0:
             raise SystemExit(f"error: {label} must be positive")
-    for label, value in (
-        ("--max-prompt-tokens", args.max_prompt_tokens),
-        ("--max-output-tokens", args.max_output_tokens),
-        ("--hard-max-total-tokens", args.hard_max_total_tokens),
-    ):
-        if value < 0:
-            raise SystemExit(f"error: {label} must be non-negative")
-
     try:
         from transformers import AutoConfig, AutoTokenizer
     except ImportError as exc:
@@ -393,8 +272,7 @@ def main() -> None:
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True)
     config = AutoConfig.from_pretrained(args.model_path, trust_remote_code=True)
-    chat_template = getattr(tokenizer, "chat_template", None)
-    if not isinstance(chat_template, str) or not chat_template:
+    if not getattr(tokenizer, "chat_template", None):
         raise SystemExit("error: tokenizer has no chat template")
 
     try:
@@ -407,10 +285,6 @@ def main() -> None:
             analyzed,
             model_path=args.model_path,
             model_context_length=detect_model_context_length(config, tokenizer),
-            chat_template_sha256=hashlib.sha256(chat_template.encode("utf-8")).hexdigest(),
-            max_prompt_tokens=args.max_prompt_tokens,
-            max_output_tokens=args.max_output_tokens,
-            hard_max_total_tokens=args.hard_max_total_tokens,
             minimum_max_length=args.minimum_max_length,
             length_alignment=args.length_alignment,
         )
@@ -426,7 +300,7 @@ def main() -> None:
     except (FileNotFoundError, RuntimeError, TokenValidationError) as exc:
         raise SystemExit(f"error: {exc}") from exc
 
-    print(json.dumps({key: value for key, value in report.items() if key != "perSample"}, ensure_ascii=False, indent=2))
+    print(json.dumps(report, ensure_ascii=False, indent=2))
     if report["violations"]:
         raise SystemExit(
             f"error: {len(report['violations'])} samples exceed token limits; see {args.report}"

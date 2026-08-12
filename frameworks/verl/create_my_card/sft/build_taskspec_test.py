@@ -29,7 +29,6 @@ TASKSPEC_FIELD_ORDER = (
 )
 EXPECTED_FIELDS = frozenset(TASKSPEC_FIELD_ORDER)
 TARGET_SIZE = "2x2"
-SCHEMA_VERSION = "create-my-card-taskspec-inference/v1"
 
 
 class TestDataError(ValueError):
@@ -154,38 +153,21 @@ def build_test_dataset(args: argparse.Namespace) -> dict[str, Any]:
     build_parquet.write_parquet(rows, output_path)
     for stale_path in stale_paths:
         stale_path.unlink()
-
-    manifest = {
-        "schemaVersion": SCHEMA_VERSION,
-        "thinkingMode": False,
-        "taskSpecSize": TARGET_SIZE,
-        "source": {
-            "location": source_location,
-            "totalRows": len(source_records),
-            "selectedRows": len(records),
-        },
-        "systemPrompt": {
-            "path": str(args.system_prompt.resolve()),
-        },
-        "test": {
-            "path": str(output_path.resolve()),
-            "count": len(rows),
-        },
-        "ids": [row["id"] for row in rows],
-        "parquetColumns": ["id", "messages", "enable_thinking"],
+    return {
+        "path": str(output_path.resolve()),
+        "count": len(rows),
+        "source": source_location,
     }
-    build_parquet.write_json_atomic(manifest, args.output_dir / "test_manifest.json")
-    return manifest
 
 
 def main() -> None:
     args = parse_args()
     try:
-        manifest = build_test_dataset(args)
+        test = build_test_dataset(args)
     except (TestDataError, build_parquet.DataValidationError, RuntimeError) as exc:
         raise SystemExit(f"error: {exc}") from exc
     print(f"Saved TaskSpec inference parquet files to: {args.output_dir.resolve()}")
-    print(json.dumps(manifest["test"], ensure_ascii=False, indent=2))
+    print(json.dumps(test, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
