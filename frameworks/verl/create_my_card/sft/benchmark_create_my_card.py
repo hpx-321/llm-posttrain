@@ -158,6 +158,111 @@ def write_report(report: dict[str, Any], output_file: Path) -> None:
     )
 
 
+def format_metric(value: Any, unit: str = "") -> str:
+    if value is None:
+        return "n/a"
+    if isinstance(value, int):
+        body = str(value)
+    elif isinstance(value, float):
+        body = f"{value:.2f}"
+    else:
+        body = str(value)
+    return f"{body} {unit}".rstrip()
+
+
+def format_percent(value: float) -> str:
+    return f"{value * 100:.2f}%"
+
+
+def format_markdown_report(report: dict[str, Any], rows: list[BenchmarkRow]) -> str:
+    quality = report["quality"]
+    latency = report["latencyMs"]
+    prompt_tokens = report["tokens"]["prompt"]
+    completion_tokens = report["tokens"]["completion"]
+    throughput = report["throughput"]
+    failure_counts = quality["failureCounts"] or {}
+
+    lines = [
+        "# CreateMyCard Benchmark Report",
+        "",
+        "## Run Configuration",
+        "",
+        "| Field | Value |",
+        "| --- | --- |",
+        f"| Model | `{report['modelPath']}` |",
+        f"| Input file | `{report['inputFile']}` |",
+        f"| Tensor parallel size | {report['tensorParallelSize']} |",
+        f"| Max model length | {format_metric(report['maxModelLen'], 'tokens')} |",
+        f"| Max new tokens | {format_metric(report['maxNewTokens'], 'tokens')} |",
+        f"| Model load | {format_metric(report['modelLoadMs'], 'ms')} |",
+        f"| Benchmark wall time | {format_metric(throughput['wallSeconds'], 's')} |",
+        "",
+        "## Quality",
+        "",
+        "| Metric | Value |",
+        "| --- | --- |",
+        f"| Total samples | {quality['total']} |",
+        f"| Successful samples | {quality['success']} |",
+        f"| Failed samples | {quality['failed']} |",
+        f"| Success rate | {format_percent(quality['successRate'])} |",
+    ]
+
+    if failure_counts:
+        for failure_type, count in failure_counts.items():
+            lines.append(f"| Failure: {failure_type} | {count} |")
+    else:
+        lines.append("| Failures | 0 |")
+
+    lines.extend(
+        [
+            "",
+            "## Latency And Throughput",
+            "",
+            "| Metric | Value |",
+            "| --- | --- |",
+            f"| Latency min | {format_metric(latency['min'], 'ms')} |",
+            f"| Latency p50 | {format_metric(latency['p50'], 'ms')} |",
+            f"| Latency p95 | {format_metric(latency['p95'], 'ms')} |",
+            f"| Latency max | {format_metric(latency['max'], 'ms')} |",
+            f"| Latency avg | {format_metric(latency['avg'], 'ms')} |",
+            f"| Request throughput | {format_metric(throughput['requestsPerSecond'], 'req/s')} |",
+            f"| Successful request throughput | {format_metric(throughput['successfulRequestsPerSecond'], 'req/s')} |",
+            f"| Completion token throughput | {format_metric(throughput['completionTokensPerSecond'], 'tok/s')} |",
+            "",
+            "## Token Lengths",
+            "",
+            "| Metric | Value |",
+            "| --- | --- |",
+            f"| Prompt tokens min | {format_metric(prompt_tokens['min'], 'tokens')} |",
+            f"| Prompt tokens p50 | {format_metric(prompt_tokens['p50'], 'tokens')} |",
+            f"| Prompt tokens p95 | {format_metric(prompt_tokens['p95'], 'tokens')} |",
+            f"| Prompt tokens max | {format_metric(prompt_tokens['max'], 'tokens')} |",
+            f"| Completion tokens min | {format_metric(completion_tokens['min'], 'tokens')} |",
+            f"| Completion tokens p50 | {format_metric(completion_tokens['p50'], 'tokens')} |",
+            f"| Completion tokens p95 | {format_metric(completion_tokens['p95'], 'tokens')} |",
+            f"| Completion tokens max | {format_metric(completion_tokens['max'], 'tokens')} |",
+            "",
+            "## Samples",
+            "",
+            "| ID | Status | Finish reason | Prompt | Completion | Latency | Error type |",
+            "| --- | --- | --- | --- | --- | --- | --- |",
+        ]
+    )
+    for row in rows:
+        status = "OK" if row.ok else "FAIL"
+        lines.append(
+            f"| `{row.sample_id}` | {status} | {row.finish_reason or 'n/a'} | "
+            f"{format_metric(row.prompt_tokens, 'tokens')} | "
+            f"{format_metric(row.completion_tokens, 'tokens')} | "
+            f"{format_metric(row.latency_ms, 'ms')} | {row.error_type or ''} |"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def write_markdown_report(markdown: str, output_file: Path) -> None:
+    output_file.write_text(markdown, encoding="utf-8")
+
+
 def batched(items: list[Any], batch_size: int) -> list[list[Any]]:
     return [items[index : index + batch_size] for index in range(0, len(items), batch_size)]
 
@@ -317,9 +422,12 @@ def main() -> None:
         model_load_ms=model_load_ms,
     )
     write_report(report, args.output_dir / "benchmark_report.json")
+    markdown = format_markdown_report(report, benchmark_rows)
+    write_markdown_report(markdown, args.output_dir / "benchmark_report.md")
 
     print(json.dumps(report["quality"], ensure_ascii=False, allow_nan=False))
     print(f"Benchmark report: {args.output_dir / 'benchmark_report.json'}")
+    print(f"Human-readable report: {args.output_dir / 'benchmark_report.md'}")
 
 
 if __name__ == "__main__":

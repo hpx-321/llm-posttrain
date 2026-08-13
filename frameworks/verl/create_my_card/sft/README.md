@@ -242,14 +242,17 @@ python3 benchmark_create_my_card.py \
 
 ```text
 benchmark-tp8-b1/
-├── benchmark_report.json   # 成功率、失败分类、token/延迟分位数、吞吐、模型加载耗时
+├── benchmark_report.json   # 机器可读汇总：成功率、失败分类、token/延迟分位数、吞吐、模型加载耗时
+├── benchmark_report.md     # 人类可读汇总：带 ms、tokens、req/s、tok/s 单位
 ├── samples.jsonl           # 每条样本的 token、latency、ok、error 和失败分类
 └── raw_compact_dsl.jsonl   # 每条样本的原始模型输出
 ```
 
-终端会打印业务质量摘要；使用 `samples.jsonl` 查看具体样本。例如：
+终端会打印业务质量摘要，并输出 JSON 与 Markdown 报告路径；使用 `benchmark_report.md` 看带单位的报告，
+使用 `samples.jsonl` 查看具体样本。例如：
 
 ```bash
+cat /mnt/data/outputs/create-my-card/benchmark-tp8-b1/benchmark_report.md
 cat /mnt/data/outputs/create-my-card/benchmark-tp8-b1/samples.jsonl
 ```
 
