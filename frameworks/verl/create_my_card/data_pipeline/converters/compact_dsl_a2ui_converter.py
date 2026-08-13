@@ -85,7 +85,6 @@ _COMPONENT_STYLE_PROPERTIES = {
             "maxLines",
             "minFontSize",
             "textAlign",
-            "textOverflow",
         }
     ),
     "Image": frozenset({"fillColor", "objectFit"}),
@@ -175,7 +174,6 @@ _STRING_PROPERTIES = frozenset(
         "scrollBar",
         "shape",
         "textAlign",
-        "textOverflow",
         "type",
         "visibility",
         "state",
@@ -2421,8 +2419,7 @@ def _normalize_icon_button_stack(styles: dict[str, Any]) -> None:
 
 
 def _normalize_text_component(styles: dict[str, Any]) -> None:
-    styles["maxLines"] = 1
-    styles["textOverflow"] = "ellipsis"
+    styles.setdefault("maxLines", 1)
 
 
 def _normalize_root_component(

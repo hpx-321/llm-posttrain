@@ -5,7 +5,7 @@
 - `compact_dsl_a2ui_converter.py`：从 [CreateMyCard `dev` 分支](https://github.com/linfachen-lff/CreateMyCard/blob/dev/widget_service/cloud/services/compact_dsl_a2ui_converter.py) 冻结的 Compact DSL → A2UI 转换器。
 - `reverse_and_verify.py`：A2UI → Compact DSL 逆向转换、正向回转和结构化差异报告。
 
-基础来源：CreateMyCard commit `6b0f5e3c9327963ae467e178da2ec5b279368a45`，上游文件 SHA-256 为 `382D6703B3F87AC2510CF542B013EFFF2EA49496872C6B94C2D28FDEE7204F20`。本地配套版按 2026-08-07 数据闭集要求做了四项变更：`createSurface` 不再输出 `width/height`，Image 保留 `fillColor`，`layoutWeight` 同时支持数值字面量和动态 path binding，结构化 `expression` binding 支持动态拼接、条件判断和公式计算；当前正向文件 SHA-256 为 `1BC4F919922C58CAD851213D15CB7D4D003737FBCB651156AA13CD7382615FB1`。
+基础来源：CreateMyCard commit `6b0f5e3c9327963ae467e178da2ec5b279368a45`，上游文件 SHA-256 为 `382D6703B3F87AC2510CF542B013EFFF2EA49496872C6B94C2D28FDEE7204F20`。本地配套版按当前数据闭集输出 `createSurface.width/height`，Image 保留 `fillColor`，`layoutWeight` 同时支持数值字面量和动态 path binding，结构化 `expression` binding 支持动态拼接、条件判断和公式计算。Text 禁止 `textOverflow`；`maxLines` 缺省为 1，但会保留显式值。当前正向文件 SHA-256 为 `AEA5FC6F022E88BE79F5F9926BF8A504D99FF1CD5686090D58DC0DB83EFD7912`。
 
 ## Python API
 
@@ -31,7 +31,9 @@ print(result.roundtrip_a2ui)
 - 按组件树前序输出 Compact 元组行，并用根 data 行无损保留完整 DataModel。
 - 完整匹配冻结样式表时收敛为 `design`。
 - 严格匹配正向展开结构时收敛为 `ActionUnit`；普通 `Button` 或 `Stack + Image` 不会被宽松误判。
-- 删除正向转换器必然重新生成的 root/Text 默认字段。
+- 删除正向转换器必然重新生成的 root 默认字段和 Text `maxLines:1`；显式的其它 `maxLines` 值原样保留。
+- 拒绝已经禁用的 Text `textOverflow`，不静默丢弃。
+- 比较前为未携带尺寸的兼容输入补齐由 `size` 决定的 Surface 尺寸，并把 `onClick` 内的结构化 path binding 规范化为最终 A2UI binding 字符串。
 - 遇到协议外或无法回转的有效字段直接报错，不静默丢弃。
 
 Hex → 颜色 Token 默认关闭；可通过 `collapse_color_tokens=True` 开启。相同 Hex 对应多个 Token 时，按冻结正向表中的定义顺序选择第一个别名。
@@ -61,13 +63,13 @@ python frameworks/verl/create_my_card/data_pipeline/converters/reverse_and_verif
   --report-out case/report.json
 ```
 
-如果 TaskSpec 内嵌 `cardSpec`，可以省略 `--card-spec`。尺寸会依次从 `--size`、CardSpec/TaskSpec 的 `suggestSize` 或 `size` 获取；只有兼容旧式、显式携带宽高的 Surface 才能从 Surface 推断。当前配套正向器不再输出 Surface 宽高，因此调用逆向器时应显式传入尺寸或提供 Spec。
+如果 TaskSpec 内嵌 `cardSpec`，可以省略 `--card-spec`。尺寸会依次从 `--size`、CardSpec/TaskSpec 的 `suggestSize` 或 `size` 获取；当前配套正向器输出 Surface 宽高。兼容输入如果未携带宽高，调用逆向器时必须显式传入尺寸或提供 Spec，回转输出会重新加入对应尺寸（2×2 为 160×160）。
 
 退出码：`0` 表示 roundtrip 通过，`1` 表示转换成功但对比不一致，`2` 表示输入、逆向、协议或上下文校验失败。
 
 ## 不可逆信息
 
-冻结正向转换器会展开 `design` 和颜色 Token、丢弃 `Progress.threshold`，并覆盖部分 root/Text 默认样式，因此无法恢复原始 Compact DSL 的逐字节写法。逆向输出的是确定性的规范化 Compact DSL；验收目标是最终 A2UI 的组件、语义、绑定、DataModel、事件和有效样式 roundtrip 等效。
+冻结正向转换器会展开 `design` 和颜色 Token、丢弃 `Progress.threshold`，覆盖 2×2 root 固定壳样式，并为未指定 `maxLines` 的 Text 补 1，因此无法恢复原始 Compact DSL 的逐字节写法。显式 `maxLines` 可逆，`textOverflow` 非法。逆向输出的是确定性的规范化 Compact DSL；验收目标是最终 A2UI 的组件、语义、绑定、DataModel、事件和有效样式 roundtrip 等效。
 
 ## 相关规范
 

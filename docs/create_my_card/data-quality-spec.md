@@ -127,6 +127,7 @@ Token 支持闭集以冻结版本正向转换器为准：Design Token 从 `_COMP
 - 消息类型、Surface、组件更新和 DataModel 更新符合最终 A2UI 协议。
 - 不包含 Markdown 围栏、解释文字或极简 DSL 元组。
 - 最终 A2UI 中不出现 `design`、颜色 Token 名或 `ActionUnit` 等中间态字段/组件。
+- Text 不得包含已禁用的 `textOverflow`；`maxLines` 缺省为 1，显式合法值必须在回转时保留。
 - 组件属性必须位于协议规定位置，不能写到对象或消息外层。
 
 ### 7.2 组件树
@@ -166,7 +167,7 @@ Token 支持闭集以冻结版本正向转换器为准：Design Token 从 `_COMP
 
 ### 8.1 自动检查
 
-- root 尺寸与 TaskSpec 及转换器尺寸规则一致；padding、圆角和裁剪按实际设计及有效渲染结果检查，不套用 PROMPT 示例常量。
+- root 尺寸与 TaskSpec 及转换器尺寸规则一致；2×2 root 固定使用 `padding:12`、`borderRadius:20`、`clip:true` 和根 `itemMargin:8`。
 - 纵向内容流主要使用 Column，横向内容流主要使用 Row。
 - Stack 只用于真实叠加、覆盖或独立定位。
 - 单子节点 Stack 必须能证明存在叠加或定位需求，否则记为 P1。
@@ -260,6 +261,8 @@ Token 命中率用于观察，不作为“越高越好”的单一指标。禁�
 - JSON key 顺序和无意义空白。
 - 经双方登记的消息/组件安全排序。
 - 明确登记且不影响渲染或语义的默认字段。
+- 兼容输入缺失的 Surface 尺寸可按已确认的 `size` 补齐；2×2 回转输出 160×160。
+- `onClick` 内结构化 `path` binding 可规范化为等价的最终 A2UI binding 字符串。
 - 等价的数值序列化形式，例如规则明确允许时的 `1` 与 `1.0`。
 
 ### 11.3 禁止归一化

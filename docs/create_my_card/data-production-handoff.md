@@ -250,6 +250,6 @@ docs/create_my_card/
 
 正向转换器与 `reverse_and_verify.py` 已统一放在 `frameworks/verl/create_my_card/data_pipeline/converters/`。逆向入口会依次执行 A2UI 解析、Compact 生成与校验、正向回转和结构化差异比较；遇到协议外或不可逆字段时直接失败，不静默丢弃。
 
-当前冻结扩展包括：Surface 不输出 `width/height`、Image 保留 `fillColor`、`layoutWeight` 支持动态 path binding，以及结构化 `expression` binding。表达式生成范围以 [Expression Profile v1](expression-profile-v1.md) 为准。
+当前冻结扩展包括：Surface 输出由尺寸决定的 `width/height`（2×2 为 160×160）、Image 保留 `fillColor`、`layoutWeight` 支持动态 path binding，以及结构化 `expression` binding。Text 禁止 `textOverflow`；`maxLines` 缺省为 1，并保留显式多行值。表达式生成范围以 [Expression Profile v1](expression-profile-v1.md) 为准。
 
 单条调用方式和退出码见[转换器说明](../../frameworks/verl/create_my_card/data_pipeline/converters/README.md)。批量生产必须固定转换器提交或文件哈希，并对整个批次执行 roundtrip。

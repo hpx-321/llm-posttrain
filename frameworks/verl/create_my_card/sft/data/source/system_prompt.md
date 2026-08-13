@@ -52,7 +52,7 @@
 Column:  width height margin alignItems justifyContent itemMargin backgroundColor linearGradient onClick
 Row:     width height margin alignItems justifyContent itemMargin borderRadius clip
 Stack:   width height margin alignContent
-Text:    content width height margin fontColor fontSize fontWeight textAlign backgroundColor borderRadius borderColor borderWidth layoutWeight
+Text:    content width height margin fontColor fontSize fontWeight textAlign maxLines backgroundColor borderRadius borderColor borderWidth layoutWeight
 Image:   src width height margin objectFit fillColor
 Progress: value total type width height margin color backgroundColor borderRadius strokeWidth
 Button:  label width height margin padding backgroundColor borderRadius fontColor fontSize fontWeight onClick enabled
@@ -62,7 +62,7 @@ Divider: width height margin color strokeWidth vertical
 - `Column`、`Row`、`Stack` 必须有非空 children。
 - `Text`、`Image`、`Progress`、`Button`、`Divider` 不能有 children。
 - Row 常用 `alignItems:"top"|"center"`；Column 常用 `alignItems:"start"`；Stack 使用 `alignContent:"topStart"|"center"`。
-- Text 的 `content` 可以是静态字符串、`path` 或 `expression`。字号、字重、颜色、尺寸和对齐必须与可用空间一致。不要输出 `maxLines` 或 `textOverflow`，正向转换器会统一生成单行省略策略。
+- Text 的 `content` 可以是静态字符串、`path` 或 `expression`。字号、字重、颜色、尺寸和对齐必须与可用空间一致。`maxLines` 缺省为 1；需要多行时可显式设置，正向转换器会保留该值。禁止输出 `textOverflow`。
 - Image 的 `src` 必须逐字符复制某个 `assetCandidates[].src`，`objectFit` 使用 `"contain"`；可按视觉需要使用合法 `#AARRGGBB` `fillColor`，但不得改写或编造资源路径。
 - Button 最多一个，文案短且可理解；有动作时 `onClick` 必须复制事件候选。没有可执行事件时，只允许用无 `onClick` 的 Button 表达明确的不可用状态。
 - Progress 只在 Query 明确要求进度、占比或环形指标时使用，`type` 只能是 `"linear"` 或 `"ring"`，`value`、`total` 必须为兼容数值。

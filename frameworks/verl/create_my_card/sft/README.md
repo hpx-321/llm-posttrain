@@ -9,7 +9,8 @@ sft/
 ├── data/source/
 │   ├── system_prompt.md
 │   ├── taskspec.json
-│   └── design_compact_dsl.jsonl
+│   ├── design_compact_dsl.jsonl
+│   └── final_renderable_a2ui.jsonl
 ├── build_parquet.py
 ├── analyze_tokens.py
 ├── qwen36_sft_dataset.py
@@ -42,7 +43,7 @@ source 数据
 
 ## 1. 构建数据
 
-`taskspec.json` 每条记录包含 `id` 和 `taskSpec`；`design_compact_dsl.jsonl` 每行包含相同 `id` 和 `designCompactDsl`。构建器会检查 ID 唯一性和双向配对关系。
+`taskspec.json` 每条记录包含 `id` 和 `taskSpec`；`design_compact_dsl.jsonl` 每行包含相同 `id` 和 `designCompactDsl`。构建器会检查 ID 唯一性和双向配对关系。`final_renderable_a2ui.jsonl` 使用相同 ID 保存当前正向转换器生成的 `finalRenderableA2ui`，作为可直接渲染和 roundtrip 审计的最终 A2UI 数据，不参与 SFT assistant 标签构建。
 
 ```bash
 cd /workspace/hql/llm-posttrain/frameworks/verl/create_my_card/sft
@@ -71,7 +72,7 @@ data/parquet/validation.parquet
 }
 ```
 
-验证集数量按32条对齐。当前192条数据默认拆分为160条训练、32条验证；扩充数据后仍按相同规则确定验证集，不强制固定比例。
+验证集数量按32条对齐。当前954条数据默认拆分为922条训练、32条验证；扩充数据后仍按相同规则确定验证集，不强制固定比例。
 
 ## 2. Token 与 OOM 预检
 

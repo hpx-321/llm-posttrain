@@ -28,7 +28,7 @@ except ImportError:  # Direct script execution.
 _MESSAGE_KINDS = ("createSurface", "updateComponents", "updateDataModel")
 _BINDING_RE = re.compile(r"^\{\{ \$\{(/[^{}]+)\} \}\}$", re.DOTALL)
 _EXPRESSION_BINDING_RE = re.compile(r"^\{\{ (.+) \}\}$", re.DOTALL)
-_GENERATED_TEXT_DEFAULTS = {"maxLines": 1, "textOverflow": "ellipsis"}
+_GENERATED_TEXT_MAX_LINES = 1
 _GENERATED_ICON_STYLES = {
     "width": 16,
     "height": 16,
@@ -139,8 +139,8 @@ def reverse_and_verify(
         protocol_profile=profile,
         surface_id=parsed.surface_id,
     )
-    source_value = _canonical_a2ui(parsed)
-    roundtrip_value = _canonical_a2ui(parse_a2ui(roundtrip_a2ui))
+    source_value = _canonical_a2ui(parsed, resolved_size)
+    roundtrip_value = _canonical_a2ui(parse_a2ui(roundtrip_a2ui), resolved_size)
     differences: list[dict[str, Any]] = []
     _collect_differences(source_value, roundtrip_value, "$", differences)
 
@@ -353,6 +353,10 @@ def _parse_components(value: Any) -> dict[str, dict[str, Any]]:
         styles = component.get("styles", {})
         if not isinstance(styles, dict):
             raise A2uiReverseConversionError(f"{component_id}: styles must be an object.")
+        if "textOverflow" in styles:
+            raise A2uiReverseConversionError(
+                f"{component_id}: Text.textOverflow is forbidden."
+            )
         allowed_styles = set(forward._COMMON_STYLE_PROPERTIES)
         allowed_styles.update(
             forward._COMPONENT_STYLE_PROPERTIES.get(component_type, frozenset())
@@ -659,12 +663,21 @@ def _reverse_root_defaults(props: dict[str, Any], size: str) -> None:
 
 
 def _reverse_text_defaults(props: dict[str, Any], component_id: str) -> None:
-    for name, expected in _GENERATED_TEXT_DEFAULTS.items():
-        if props.get(name) != expected:
-            raise A2uiReverseConversionError(
-                f"{component_id}: generated Text.{name} must equal {expected!r}."
-            )
-        props.pop(name)
+    if "textOverflow" in props:
+        raise A2uiReverseConversionError(
+            f"{component_id}: Text.textOverflow is forbidden."
+        )
+    if "maxLines" not in props:
+        raise A2uiReverseConversionError(
+            f"{component_id}: generated Text.maxLines is missing."
+        )
+    max_lines = props["maxLines"]
+    if not isinstance(max_lines, (int, float)) or isinstance(max_lines, bool):
+        raise A2uiReverseConversionError(
+            f"{component_id}: Text.maxLines must be numeric."
+        )
+    if max_lines == _GENERATED_TEXT_MAX_LINES:
+        props.pop("maxLines")
 
 
 def _collapse_design(
@@ -773,18 +786,29 @@ def _roundtrip_profile(
     return profile
 
 
-def _canonical_a2ui(parsed: ParsedA2ui) -> dict[str, Any]:
+def _canonical_a2ui(parsed: ParsedA2ui, size: str) -> dict[str, Any]:
+    create_surface = copy.deepcopy(parsed.create_surface)
+    if "width" not in create_surface:
+        create_surface.update(forward._surface_dimensions(size, {}))
+
     update = copy.deepcopy(parsed.update_components)
     update["components"] = [
-        copy.deepcopy(parsed.components_by_id[component_id])
+        _canonical_component(parsed.components_by_id[component_id])
         for component_id in parsed.component_order
     ]
     return {
         "version": parsed.version,
-        "createSurface": copy.deepcopy(parsed.create_surface),
+        "createSurface": create_surface,
         "updateComponents": update,
         "updateDataModel": copy.deepcopy(parsed.update_data_model),
     }
+
+
+def _canonical_component(component: dict[str, Any]) -> dict[str, Any]:
+    normalized = copy.deepcopy(component)
+    if "onClick" in normalized:
+        normalized["onClick"] = forward._convert_path_bindings(normalized["onClick"])
+    return normalized
 
 
 def _collect_differences(
