@@ -828,17 +828,16 @@ def _validate_no_additional_fence(lines: list[str]) -> None:
             )
 
 
-def _repair_compact_json_rows(compact_dsl: str) -> str:
+def _normalize_compact_json_rows(compact_dsl: str) -> str:
     body = _strip_optional_genui_fence(compact_dsl)
     rows = _extract_top_level_array_rows(body)
-    repaired_rows: list[str] = []
+    normalized_rows: list[str] = []
     for line_number, row in enumerate(rows, 1):
-        repaired = _remove_trailing_json_commas(row)
-        value = _parse_json_line(repaired, line_number)
-        repaired_rows.append(
+        value = _parse_json_line(row, line_number)
+        normalized_rows.append(
             json.dumps(value, ensure_ascii=False, separators=(",", ":"))
         )
-    return "\n".join(repaired_rows)
+    return "\n".join(normalized_rows)
 
 
 def _extract_top_level_array_rows(body: str) -> list[str]:
@@ -849,7 +848,7 @@ def _extract_top_level_array_rows(body: str) -> list[str]:
     in_string = False
     escaped = False
 
-    for index, char in enumerate(body):
+    for char in body:
         if not expected_closers:
             if char == "[":
                 _validate_text_between_rows(outside, bool(rows))
@@ -881,9 +880,6 @@ def _extract_top_level_array_rows(body: str) -> list[str]:
         if char not in {"]", "}"}:
             continue
         if char != expected_closers[-1]:
-            if _is_redundant_json_closer(body, index, expected_closers[-1]):
-                current.pop()
-                continue
             raise CompactDslConversionError(
                 "Compact DSL contains mismatched JSON delimiters."
             )
@@ -897,21 +893,14 @@ def _extract_top_level_array_rows(body: str) -> list[str]:
             raise CompactDslConversionError(
                 "Compact DSL contains an unclosed JSON string."
             )
-        current.extend(reversed(expected_closers))
-        rows.append("".join(current))
+        raise CompactDslConversionError(
+            "Compact DSL contains unclosed JSON delimiters."
+        )
 
     if not rows:
         raise CompactDslConversionError("Compact DSL output is empty.")
+    _validate_no_trailing_json_closers(outside)
     return rows
-
-
-def _is_redundant_json_closer(text: str, index: int, expected_closer: str) -> bool:
-    """Return whether a mismatched closer is immediately followed by the right one."""
-    for following in text[index + 1 :]:
-        if following.isspace():
-            continue
-        return following == expected_closer
-    return False
 
 
 def _validate_text_between_rows(outside: list[str], has_previous_row: bool) -> None:
@@ -919,55 +908,21 @@ def _validate_text_between_rows(outside: list[str], has_previous_row: bool) -> N
         return
     text = "".join(outside)
     for char in text:
-        if not char.isspace() and char not in {"]", "}"}:
+        if not char.isspace():
             raise CompactDslConversionError(
                 "Compact DSL contains non-JSON text between rows."
             )
 
 
-def _remove_trailing_json_commas(row: str) -> str:
-    output: list[str] = []
-    in_string = False
-    escaped = False
-    index = 0
-
-    while index < len(row):
-        char = row[index]
-        if in_string:
-            output.append(char)
-            if escaped:
-                escaped = False
-            elif char == "\\":
-                escaped = True
-            elif char == '"':
-                in_string = False
-            index += 1
-            continue
-
-        if char == '"':
-            in_string = True
-            output.append(char)
-            index += 1
-            continue
-        if char == "," and _next_non_whitespace_is_closer(row, index + 1):
-            index += 1
-            continue
-        output.append(char)
-        index += 1
-
-    return "".join(output)
-
-
-def _next_non_whitespace_is_closer(text: str, start: int) -> bool:
-    for index in range(start, len(text)):
-        if text[index].isspace():
-            continue
-        return text[index] in {"]", "}"}
-    return False
+def _validate_no_trailing_json_closers(outside: list[str]) -> None:
+    if any(char in {"]", "}"} for char in outside):
+        raise CompactDslConversionError(
+            "Compact DSL contains mismatched JSON delimiters."
+        )
 
 
 def _parse_compact_rows(compact_dsl: str) -> list[CompactRow]:
-    body = _repair_compact_json_rows(compact_dsl)
+    body = _normalize_compact_json_rows(compact_dsl)
     rows: list[CompactRow] = []
 
     for line_number, raw_line in enumerate(body.splitlines(), 1):

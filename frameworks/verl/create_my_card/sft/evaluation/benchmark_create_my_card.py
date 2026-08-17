@@ -9,7 +9,6 @@ import json
 import math
 import os
 import statistics
-import sys
 import time
 from collections import Counter
 from dataclasses import asdict, dataclass
@@ -17,20 +16,34 @@ from pathlib import Path
 from typing import Any
 
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-
-from export_renderable_a2ui import (  # noqa: E402
-    CompactDslConversionError,
-    DEFAULT_INPUT_FILE,
-    convert_to_renderable_a2ui,
-    empty_accelerator_cache,
-    final_compact_dsl,
-    get_tensor_parallel_size,
-    read_inputs,
-    require_new_output_directory,
-    shutdown_llm_engine,
-    write_jsonl,
-)
+if __package__:
+    from .export_renderable_a2ui import (
+        CompactDslConversionError,
+        DEFAULT_INPUT_FILE,
+        DEFAULT_MAX_MODEL_LEN,
+        convert_to_renderable_a2ui,
+        empty_accelerator_cache,
+        final_compact_dsl,
+        get_tensor_parallel_size,
+        read_inputs,
+        require_new_output_directory,
+        shutdown_llm_engine,
+        write_jsonl,
+    )
+else:
+    from export_renderable_a2ui import (
+        CompactDslConversionError,
+        DEFAULT_INPUT_FILE,
+        DEFAULT_MAX_MODEL_LEN,
+        convert_to_renderable_a2ui,
+        empty_accelerator_cache,
+        final_compact_dsl,
+        get_tensor_parallel_size,
+        read_inputs,
+        require_new_output_directory,
+        shutdown_llm_engine,
+        write_jsonl,
+    )
 
 
 @dataclass(frozen=True)
@@ -52,7 +65,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--input-file", type=Path, default=DEFAULT_INPUT_FILE)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--tensor-parallel-size", type=int, default=8)
-    parser.add_argument("--max-model-len", type=int, default=4096)
+    parser.add_argument("--max-model-len", type=int, default=DEFAULT_MAX_MODEL_LEN)
     parser.add_argument("--max-new-tokens", type=int, default=1536)
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.9)
     parser.add_argument("--seed", type=int, default=42)

@@ -15,5 +15,9 @@ def skip_checkpoint_save(handler: object, step: int) -> None:
 sft_trainer.CheckpointHandler.save_checkpoint = skip_checkpoint_save
 
 
-if __name__ == "__main__":
+def main() -> None:
     sft_trainer.main()
+
+
+if __name__ == "__main__":
+    main()

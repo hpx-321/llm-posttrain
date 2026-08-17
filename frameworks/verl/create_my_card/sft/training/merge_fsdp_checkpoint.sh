@@ -2,9 +2,9 @@
 set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-PROJECT_ROOT=$(cd -- "${SCRIPT_DIR}/../../../.." && pwd)
+PROJECT_ROOT=$(cd -- "${SCRIPT_DIR}/../../../../.." && pwd)
 
-SAVE_PATH=${SAVE_PATH:-/mnt/data/checkpoints/qwen36-27b-create-my-card-sft-v1}
+SAVE_PATH=${SAVE_PATH:-/mnt/model/qwen36-27b-create-my-card-sft-v1}
 CHECKPOINT_STEP=${CHECKPOINT_STEP:-best}
 MERGED_MODEL=${MERGED_MODEL:-}
 
@@ -38,7 +38,7 @@ if ! compgen -G "${ckpt_dir}/model_world_size_*_rank_*.pt" >/dev/null; then
 fi
 
 if [[ -z "${MERGED_MODEL}" ]]; then
-  MERGED_MODEL="/mnt/data/models/qwen36-27b-create-my-card-sft-v1-step${step}"
+  MERGED_MODEL="/mnt/model/qwen36-27b-create-my-card-sft-v1-step${step}"
 fi
 if [[ -e "${MERGED_MODEL}" || -L "${MERGED_MODEL}" ]]; then
   echo "Error: merge target already exists: ${MERGED_MODEL}" >&2
@@ -59,7 +59,7 @@ python3 -m verl.model_merger merge \
   --trust-remote-code \
   --use_cpu_initialization
 
-python3 frameworks/verl/create_my_card/sft/validate_merged_model.py \
+python3 "${SCRIPT_DIR}/validate_merged_model.py" \
   --model-path "${MERGED_MODEL}"
 
 echo "Merge completed at $(date '+%Y-%m-%d %H:%M:%S %z')"

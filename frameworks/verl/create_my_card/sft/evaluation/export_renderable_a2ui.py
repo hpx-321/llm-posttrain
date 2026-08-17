@@ -14,7 +14,8 @@ from typing import Any
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = SCRIPT_DIR.parents[3]
+SFT_DIR = SCRIPT_DIR.parent
+PROJECT_ROOT = SFT_DIR.parents[3]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from frameworks.verl.create_my_card.data_pipeline.converters import (  # noqa: E402
@@ -23,7 +24,8 @@ from frameworks.verl.create_my_card.data_pipeline.converters import (  # noqa: E
 )
 
 
-DEFAULT_INPUT_FILE = SCRIPT_DIR / "data" / "parquet" / "test.parquet"
+DEFAULT_INPUT_FILE = SFT_DIR / "data" / "parquet" / "test.parquet"
+DEFAULT_MAX_MODEL_LEN = 5632
 SAFE_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 
@@ -48,7 +50,7 @@ def parse_args() -> argparse.Namespace:
         default=8,
         help="vLLM tensor parallel size; 8 divides Qwen3.6-27B's 24 attention heads.",
     )
-    parser.add_argument("--max-model-len", type=int, default=4096)
+    parser.add_argument("--max-model-len", type=int, default=DEFAULT_MAX_MODEL_LEN)
     parser.add_argument("--max-new-tokens", type=int, default=1536)
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.9)
     parser.add_argument("--seed", type=int, default=42)
@@ -403,19 +405,20 @@ def main() -> None:
                 }
             )
 
-    if conversion_errors:
-        error_file = args.output_dir / "conversion_errors.jsonl"
-        write_jsonl(conversion_errors, error_file)
-        raise RuntimeError(
-            f"{len(conversion_errors)} of {len(raw_rows)} Compact DSL outputs failed conversion; "
-            f"raw outputs: {raw_output_file}; errors: {error_file}"
-        )
-
     write_renderable_outputs(export_rows, args.output_dir)
     print(f"Exported {len(export_rows)} renderable A2UI files: {args.output_dir}")
     if max_prompt_tokens is not None:
         print(f"Maximum prompt tokens: {max_prompt_tokens}")
     print(f"Maximum completion tokens: {max(row['completionTokens'] for row in raw_rows)}")
+
+    if conversion_errors:
+        error_file = args.output_dir / "conversion_errors.jsonl"
+        write_jsonl(conversion_errors, error_file)
+        raise RuntimeError(
+            f"{len(conversion_errors)} of {len(raw_rows)} Compact DSL outputs failed conversion; "
+            f"retained {len(export_rows)} renderable A2UI files in {args.output_dir}; "
+            f"raw outputs: {raw_output_file}; errors: {error_file}"
+        )
 
 
 if __name__ == "__main__":

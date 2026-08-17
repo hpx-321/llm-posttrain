@@ -5,7 +5,7 @@
 - `compact_dsl_a2ui_converter.py`：从 [CreateMyCard `dev` 分支](https://github.com/linfachen-lff/CreateMyCard/blob/dev/widget_service/cloud/services/compact_dsl_a2ui_converter.py) 冻结的 Compact DSL → A2UI 转换器。
 - `reverse_and_verify.py`：A2UI → Compact DSL 逆向转换、正向回转和结构化差异报告。
 
-基础来源：CreateMyCard commit `6b0f5e3c9327963ae467e178da2ec5b279368a45`，上游文件 SHA-256 为 `382D6703B3F87AC2510CF542B013EFFF2EA49496872C6B94C2D28FDEE7204F20`。本地配套版按当前数据闭集输出 `createSurface.width/height`，Image 保留 `fillColor`，`layoutWeight` 同时支持数值字面量和动态 path binding，结构化 `expression` binding 支持动态拼接、条件判断和公式计算。Text 禁止 `textOverflow`；`maxLines` 缺省为 1，但会保留显式值。当前正向文件 SHA-256 为 `AEA5FC6F022E88BE79F5F9926BF8A504D99FF1CD5686090D58DC0DB83EFD7912`。
+基础来源：CreateMyCard commit `6b0f5e3c9327963ae467e178da2ec5b279368a45`，上游文件 SHA-256 为 `382D6703B3F87AC2510CF542B013EFFF2EA49496872C6B94C2D28FDEE7204F20`。本地配套版按当前数据闭集输出 `createSurface.width/height`，Image 保留 `fillColor`，`layoutWeight` 同时支持数值字面量和动态 path binding，结构化 `expression` binding 支持动态拼接、条件判断和公式计算。Text 禁止 `textOverflow`；`maxLines` 缺省为 1，但会保留显式值。正向解析严格拒绝 JSON 尾逗号、未闭合分隔符和冗余或错配的关闭符号。当前正向文件 SHA-256 为 `0389E1EC34903BBDD1FA9FD3F9AF67266E21A6AB8D84D36304D0958B5B4C341A`。
 
 ## Python API
 

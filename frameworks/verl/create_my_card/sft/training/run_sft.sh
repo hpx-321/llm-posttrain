@@ -4,12 +4,14 @@ set -euo pipefail
 SCRIPT_PATH=${BASH_SOURCE[0]}
 SCRIPT_DIR=$(dirname -- "${SCRIPT_PATH}")
 SCRIPT_DIR=$(cd -- "${SCRIPT_DIR}" && pwd)
-PROJECT_ROOT=$(cd -- "${SCRIPT_DIR}/../../../.." && pwd)
+SFT_DIR=$(cd -- "${SCRIPT_DIR}/.." && pwd)
+PROJECT_ROOT=$(cd -- "${SCRIPT_DIR}/../../../../.." && pwd)
+VERL_DIR=$(cd -- "${SCRIPT_DIR}/../../.." && pwd)
 
 MODEL_PATH=${MODEL_PATH:-/mnt/model/Qwen3.6-27B}
-DATA_DIR=${DATA_DIR:-${SCRIPT_DIR}/data/parquet}
-SFT_DATASET_PATH=${SFT_DATASET_PATH:-${SCRIPT_DIR}/qwen36_sft_dataset.py}
-SAVE_PATH=${SAVE_PATH:-/mnt/data/checkpoints/qwen36-27b-create-my-card-sft}
+DATA_DIR=${DATA_DIR:-${SFT_DIR}/data/parquet}
+SFT_DATASET_PATH=${SFT_DATASET_PATH:-${SFT_DIR}/dataset/qwen36_sft_dataset.py}
+SAVE_PATH=${SAVE_PATH:-/mnt/model/qwen36-27b-create-my-card-sft-v1}
 OOM_PROBE_FILE=${OOM_PROBE_FILE:-${DATA_DIR}/oom_probe.parquet}
 TRAIN_DEVICE=${TRAIN_DEVICE:-npu}
 
@@ -23,8 +25,8 @@ SP_SIZE=${SP_SIZE:-1}
 TRAIN_BATCH_SIZE=${TRAIN_BATCH_SIZE:-}
 MICRO_BATCH_SIZE_PER_GPU=${MICRO_BATCH_SIZE_PER_GPU:-1}
 
-MAX_LENGTH=${MAX_LENGTH:-4096}
-MAX_TOKEN_LEN_PER_GPU=${MAX_TOKEN_LEN_PER_GPU:-8192}
+MAX_LENGTH=${MAX_LENGTH:-5632}
+MAX_TOKEN_LEN_PER_GPU=${MAX_TOKEN_LEN_PER_GPU:-11264}
 
 LEARNING_RATE=${LEARNING_RATE:-}
 TOTAL_EPOCHS=${TOTAL_EPOCHS:-3}
@@ -39,12 +41,16 @@ BEST_CKPT_MIN_DELTA=${BEST_CKPT_MIN_DELTA:-0}
 LOG_DIR=${LOG_DIR:-/mnt/data/logs/qwen36-27b-create-my-card-sft}
 PROJECT_NAME=${PROJECT_NAME:-qwen36-create-my-card-sft}
 EXPERIMENT_NAME=${EXPERIMENT_NAME:-qwen36-27b-full-sft}
+TENSORBOARD_DIR=${TENSORBOARD_DIR:-/mnt/data/logs/verl_create_my_card_sft_1}
+TENSORBOARD_HOST=${TENSORBOARD_HOST:-0.0.0.0}
+TENSORBOARD_PORT=${TENSORBOARD_PORT:-6006}
 
 export HYDRA_FULL_ERROR=1
 export TOKENIZERS_PARALLELISM=false
 export PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}
 export PYTORCH_NPU_ALLOC_CONF=${PYTORCH_NPU_ALLOC_CONF:-expandable_segments:True}
+export TENSORBOARD_DIR
 
 fail() {
   echo "Error: $*" >&2
@@ -123,7 +129,7 @@ fi
 
 if [[ "${DRY_RUN}" == "1" ]]; then
   [[ -f "${OOM_PROBE_FILE}" ]] || fail \
-    "missing ${OOM_PROBE_FILE}; generate it with analyze_tokens.py before the dry run"
+    "missing ${OOM_PROBE_FILE}; generate it with ${SFT_DIR}/dataset/analyze_tokens.py before the dry run"
   TRAIN_FILE=${OOM_PROBE_FILE}
   TRAINER_ENTRY=("${SCRIPT_DIR}/sft_dry_run.py")
   CHECKPOINT_SUMMARY=disabled
@@ -169,6 +175,8 @@ echo "Dry run / steps:              ${DRY_RUN} / ${DRY_RUN_STEPS}"
 echo "Checkpoint saving:            ${CHECKPOINT_SUMMARY}"
 echo "Best-checkpoint min delta:    ${BEST_CKPT_MIN_DELTA}"
 echo "Log:                          ${LOG_FILE}"
+echo "TensorBoard events:           ${TENSORBOARD_DIR}"
+echo "TensorBoard URL:              http://${TENSORBOARD_HOST}:${TENSORBOARD_PORT}"
 echo "============================================================"
 
 extra_args=()
@@ -192,6 +200,11 @@ else
 fi
 
 cd "${PROJECT_ROOT}"
+
+TENSORBOARD_DIR="${TENSORBOARD_DIR}" \
+  TENSORBOARD_HOST="${TENSORBOARD_HOST}" \
+  TENSORBOARD_PORT="${TENSORBOARD_PORT}" \
+  bash "${VERL_DIR}/dashboard/run_tensorboard.sh"
 
 torchrun \
   --nnodes=1 \
@@ -241,7 +254,7 @@ torchrun \
   "trainer.default_local_dir=${SAVE_PATH}" \
   "trainer.project_name=${PROJECT_NAME}" \
   "trainer.experiment_name=${EXPERIMENT_NAME}" \
-  'trainer.logger=["console"]' \
+  'trainer.logger=["console","tensorboard"]' \
   "trainer.device=${TRAIN_DEVICE}" \
   trainer.nnodes=1 \
   "trainer.n_gpus_per_node=${NPROC_PER_NODE}" \

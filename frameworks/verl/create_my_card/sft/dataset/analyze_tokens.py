@@ -12,10 +12,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
-from qwen36_sft_dataset import SFTDataError, apply_template, validate_messages
+if __package__:
+    from .qwen36_sft_dataset import SFTDataError, apply_template, validate_messages
+else:
+    from qwen36_sft_dataset import SFTDataError, apply_template, validate_messages
 
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DATA_DIR = BASE_DIR / "data" / "parquet"
 
 

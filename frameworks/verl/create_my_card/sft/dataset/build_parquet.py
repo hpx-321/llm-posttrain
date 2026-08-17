@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_SYSTEM_PROMPT = BASE_DIR / "data" / "source" / "system_prompt.md"
 DEFAULT_TASKSPEC = BASE_DIR / "data" / "source" / "taskspec.json"
 DEFAULT_COMPACT_DSL = BASE_DIR / "data" / "source" / "design_compact_dsl.jsonl"

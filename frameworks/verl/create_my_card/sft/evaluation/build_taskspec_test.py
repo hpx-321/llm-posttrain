@@ -10,12 +10,21 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-import build_parquet
+
+SFT_DIR = Path(__file__).resolve().parent.parent
+if __package__:
+    from ..dataset import build_parquet
+else:
+    import sys
+
+    sys.path.insert(0, str(SFT_DIR))
+    from dataset import build_parquet
 
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = SFT_DIR
 DEFAULT_SYSTEM_PROMPT = BASE_DIR / "data" / "source" / "system_prompt.md"
 DEFAULT_OUTPUT_DIR = BASE_DIR / "data" / "parquet"
+DEFAULT_SOURCE_FILE = BASE_DIR / "data" / "source" / "taskspec_cases.json"
 DEFAULT_SOURCE_URL = (
     "https://raw.githubusercontent.com/InnovationTea/CreateMyCard/"
     "main/testdata/taskspec/taskspec_cases.json"
@@ -41,24 +50,27 @@ def parse_args() -> argparse.Namespace:
     source.add_argument(
         "--source-file",
         type=Path,
-        help="Use a previously downloaded taskspec_cases.json instead of GitHub.",
+        help=f"Normalized TaskSpec source; defaults to {DEFAULT_SOURCE_FILE}.",
     )
     source.add_argument(
         "--source-url",
-        default=DEFAULT_SOURCE_URL,
-        help="Raw GitHub URL used when --source-file is omitted.",
+        help=f"Download a normalized TaskSpec source; upstream default is {DEFAULT_SOURCE_URL}.",
     )
     parser.add_argument("--system-prompt", type=Path, default=DEFAULT_SYSTEM_PROMPT)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     return parser.parse_args()
 
 
-def read_source_bytes(source_file: Path | None, source_url: str) -> tuple[bytes, str]:
+def read_source_bytes(source_file: Path | None, source_url: str | None) -> tuple[bytes, str]:
+    if source_file is None and source_url is None:
+        source_file = DEFAULT_SOURCE_FILE
     if source_file is not None:
         if not source_file.is_file():
             raise TestDataError(f"source file does not exist: {source_file}")
         return source_file.read_bytes(), str(source_file.resolve())
 
+    if source_url is None:
+        raise AssertionError("source URL resolution failed")
     request = urllib.request.Request(
         source_url,
         headers={"User-Agent": "llm-posttrain-create-my-card-eval/1"},
