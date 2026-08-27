@@ -1,0 +1,78 @@
+{
+  "version": "2.2.0",
+  "complexity_dimensions": {
+    "min_facts": 0,
+    "max_facts": 4,
+    "high_fact_min": 3,
+    "min_actions": 1,
+    "max_actions": 3,
+    "high_action_min": 2
+  },
+  "complexity": {
+    "simple": {
+      "max_detailed_chars": 70,
+      "max_compact_chars": 55
+    },
+    "medium": {
+      "max_detailed_chars": 120,
+      "max_compact_chars": 90
+    },
+    "complex": {
+      "max_detailed_chars": 180,
+      "max_compact_chars": 140
+    }
+  },
+  "naturalness": {
+    "list_style_labels": [
+      "关键信息",
+      "数据包括",
+      "字段包括",
+      "信息如下"
+    ],
+    "legacy_opening": "帮我生成一个手机卡片：",
+    "technical_terms": [
+      "API",
+      "JSON",
+      "schema",
+      "Schema",
+      "bundle",
+      "MCC",
+      "MNC",
+      "SIM",
+      "provider",
+      "deeplink",
+      "TaskSpec",
+      "CardSpec",
+      "artifact",
+      "DSL",
+      "DataModel",
+      "writeResultTo",
+      "capabilityId",
+      "entityId",
+      "catalog_ref",
+      "request_id",
+      "Query",
+      "query_plan",
+      "required_terms"
+    ]
+  },
+  "card_density": {
+    "2x2": {
+      "max_facts": 4,
+      "max_actions": 2
+    },
+    "2x4": {
+      "min_facts": 4,
+      "min_actions": 2,
+      "max_facts": 4,
+      "max_actions": 3,
+      "require_facts_or_actions": true
+    }
+  },
+  "batch_diversity": {
+    "near_duplicate_threshold": 0.9,
+    "opening_fingerprint_chars": 10,
+    "opening_repeat_minimum": 3,
+    "opening_repeat_share": 0.4
+  }
+}

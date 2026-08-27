@@ -40,7 +40,7 @@ def normalized(text: str) -> str:
 
 
 def find_catalog_root(dataset_root: Path, explicit: str | None) -> Path | None:
-    candidates = []
+    candidates = [dataset_root / "catalogs"]
     if explicit:
         supplied = Path(explicit)
         candidates.extend([supplied, supplied / "catalogs"])
@@ -157,7 +157,7 @@ def audit(root: Path, catalog_root: Path | None) -> dict[str, object]:
                 catalog_errors.append(f"exact frozen-evaluation matches: {frozen_matches[:10]}")
         if catalog_errors:
             errors.append(f"{len(catalog_errors)} rows fail strict scene/action/persona or frozen-query checks; see catalog_check.examples")
-        catalog_check = {"root": str(catalog_root), "error_count": len(catalog_errors), "examples": catalog_errors[:20]}
+        catalog_check = {"root": "catalogs" if catalog_root == root / "catalogs" else str(catalog_root), "error_count": len(catalog_errors), "examples": catalog_errors[:20]}
     else:
         errors.append("catalog not found; pass --catalog-root to verify scene/action/persona provenance")
 

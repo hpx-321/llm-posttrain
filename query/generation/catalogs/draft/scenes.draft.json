@@ -1,0 +1,2556 @@
+{
+  "catalog_id": "scenes",
+  "version": "2026-08-21-approved-11",
+  "review_status": "approved",
+  "source": "manual_scene_review + 2026-08-21 batch (7.0 field cleanup)",
+  "usage_rule": "只记录已审核通过的场景，不把候选或不可实现场景混进来。",
+  "category_taxonomy": {
+    "个人时间与效率": [
+      "日程与会议",
+      "专注工作",
+      "待办管理",
+      "通话联络"
+    ],
+    "出行与环境决策": [
+      "位置确认",
+      "天气参考",
+      "车辆事务",
+      "驾驶与常用目的地"
+    ],
+    "健康、运动与作息": [
+      "睡眠监测",
+      "睡眠规划",
+      "运动监测",
+      "运动复盘"
+    ],
+    "家庭、关系与照护": [
+      "居家事务",
+      "食材管理",
+      "宠物照护",
+      "家庭接送",
+      "长辈关怀",
+      "家庭安全"
+    ],
+    "设备与数字管理": [
+      "续航管理",
+      "应用使用管理",
+      "设备充电",
+      "耳机设备状态"
+    ],
+    "内容、娱乐与创作": [
+      "耳机音乐播控",
+      "拍摄创作"
+    ]
+  },
+  "scenes": [
+    {
+      "scene_id": "calendar_next_schedule",
+      "scene_name": "下一场日程快速确认",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "日程与会议",
+      "user_goal": "用户不用打开日历就能确认下一场日程。",
+      "typical_users": [
+        "上班族",
+        "学生"
+      ],
+      "typical_states": [
+        "临近",
+        "进行中"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "日程标题",
+        "日程开始时间",
+        "日程结束时间",
+        "提醒时间"
+      ],
+      "candidate_actions": [
+        "查询日程",
+        "跳转日程"
+      ]
+    },
+    {
+      "scene_id": "calendar_meeting_join",
+      "scene_name": "临近会议快速入会",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "日程与会议",
+      "user_goal": "会议即将开始时，用户可以直接进入会议或查看会议详情。",
+      "typical_users": [
+        "上班族"
+      ],
+      "typical_states": [
+        "临近",
+        "待入会"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "日程标题",
+        "日程开始时间",
+        "日程链接",
+        "提醒时间"
+      ],
+      "candidate_actions": [
+        "welink一键入会",
+        "跳转日程"
+      ]
+    },
+    {
+      "scene_id": "low_battery_outdoor",
+      "scene_name": "出门前低电量判断",
+      "primary_category": "设备与数字管理",
+      "task_cluster": "续航管理",
+      "user_goal": "用户出门前快速判断手机还能撑多久，以及要不要立刻充电或开超省电模式。",
+      "typical_users": [
+        "通勤用户",
+        "外出用户"
+      ],
+      "typical_states": [
+        "低电量",
+        "续航吃紧"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "both",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "充电状态"
+      ],
+      "candidate_actions": [
+        "一键开启省电模式",
+        "跳转到电池设置页面"
+      ]
+    },
+    {
+      "scene_id": "focus_before_meeting",
+      "scene_name": "会议前一键进入专注",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "专注工作",
+      "user_goal": "会议开始前减少打扰，快速开启专注或免打扰模式。",
+      "typical_users": [
+        "上班族",
+        "学生"
+      ],
+      "typical_states": [
+        "临近会议",
+        "待开始"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "日程标题",
+        "日程开始时间",
+        "日程结束时间"
+      ],
+      "candidate_actions": [
+        "开启专注免打扰开关",
+        "模式切换（免打扰、睡眠、学习）"
+      ]
+    },
+    {
+      "scene_id": "sleep_supervision",
+      "scene_name": "睡眠状态快速确认",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "睡眠监测",
+      "user_goal": "用户早上快速了解昨晚睡眠状态，并决定是否需要调整作息。",
+      "typical_users": [
+        "需要规律作息的用户",
+        "工作压力较大的用户"
+      ],
+      "typical_states": [
+        "睡眠不足",
+        "睡眠充足",
+        "作息紊乱"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "夜间正式睡眠的总时长",
+        "睡眠状态",
+        "睡眠综合得分"
+      ],
+      "candidate_actions": [
+        "跳转睡眠页"
+      ]
+    },
+    {
+      "scene_id": "headset_music_shortcut",
+      "scene_name": "耳机连接后快速进入音乐与播控",
+      "primary_category": "内容、娱乐与创作",
+      "task_cluster": "耳机音乐播控",
+      "user_goal": "用户确认耳机连接后快速进入常用音乐内容，并完成基础播放控制。",
+      "typical_users": [
+        "通勤听歌用户",
+        "运动用户"
+      ],
+      "typical_states": [
+        "设备已连接",
+        "设备未连接",
+        "电量偏低"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "both",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "耳机的设备名称",
+        "蓝牙耳机当前是否有蓝牙耳机处于连接",
+        "左耳机的当前电量百分比",
+        "右耳机的当前电量百分比"
+      ],
+      "candidate_actions": [
+        "跳转音乐首页",
+        "跳转到每日30首和收藏页面"
+      ]
+    },
+    {
+      "scene_id": "missed_call_quick_return",
+      "scene_name": "未接来电快速回拨",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "通话联络",
+      "user_goal": "用户不用打开电话应用就能发现未接来电并快速回拨。",
+      "typical_users": [
+        "需要及时处理电话的用户",
+        "工作用户"
+      ],
+      "typical_states": [
+        "未接来电",
+        "待回拨"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "both",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "未接来电数",
+        "联系人（人名、手机号）",
+        "接听状态（未接/已接听）"
+      ],
+      "candidate_actions": [
+        "拨打电话",
+        "跳转到电话主页"
+      ]
+    },
+    {
+      "scene_id": "memo_today_todo",
+      "scene_name": "今日待办快速查看",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "待办管理",
+      "user_goal": "用户在桌面快速确认今天还有哪些待办事项。",
+      "typical_users": [
+        "上班族",
+        "学生"
+      ],
+      "typical_states": [
+        "未开始",
+        "临期",
+        "逾期"
+      ],
+      "card_fit": "candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "待办标题",
+        "提醒时间",
+        "是否已完成",
+        "未完成数"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录"
+      ]
+    },
+    {
+      "scene_id": "app_usage_overlimit",
+      "scene_name": "娱乐应用使用超时提醒",
+      "primary_category": "设备与数字管理",
+      "task_cluster": "应用使用管理",
+      "user_goal": "用户快速确认指定应用使用时长，并进入健康使用设置。",
+      "typical_users": [
+        "需要控制使用时长的用户",
+        "学生"
+      ],
+      "typical_states": [
+        "正常",
+        "使用时间超时",
+        "待管控"
+      ],
+      "card_fit": "candidate",
+      "value_type": "both",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "应用名称",
+        "前台运行时间",
+        "获取应用使用时长和耗电"
+      ],
+      "candidate_actions": [
+        "跳到设置健康使用设备页面"
+      ]
+    },
+    {
+      "scene_id": "current_location_shortcut",
+      "scene_name": "当前位置快速查看",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "位置确认",
+      "user_goal": "用户快速确认当前位置，减少进入地图或位置服务的步骤。",
+      "typical_users": [
+        "出行用户",
+        "需要确认位置的用户"
+      ],
+      "typical_states": [
+        "定位成功",
+        "定位失败",
+        "数据过期"
+      ],
+      "card_fit": "candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "occasional",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "位置经纬度"
+      ],
+      "candidate_actions": []
+    },
+    {
+      "scene_id": "home_utility_meter_log",
+      "scene_name": "居家水电燃气抄表",
+      "primary_category": "家庭、关系与照护",
+      "task_cluster": "居家事务",
+      "user_goal": "用户缴费或记录时快速查看最近一次水、电、燃气读数，减少翻找备忘录的步骤。",
+      "required_applications": [
+        "备忘录"
+      ],
+      "typical_users": [
+        "家庭用户",
+        "需要定期抄表的用户"
+      ],
+      "typical_states": [
+        "月底抄表",
+        "缴费前",
+        "准备记录"
+      ],
+      "card_fit": "candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "备忘录标题",
+        "备忘录正文",
+        "创建时间",
+        "修改时间",
+        "关联位置"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "可复用备忘录标题/正文/时间字段展示已有记录；不包含卡片直接新增或修改读数。",
+      "data_semantics": "水、电、燃气名称和读数需要按统一格式写在备忘录标题或正文中。"
+    },
+    {
+      "scene_id": "food_expiry_memo",
+      "scene_name": "食材保质期备忘",
+      "primary_category": "家庭、关系与照护",
+      "task_cluster": "食材管理",
+      "user_goal": "用户打开冰箱或准备做饭时快速确认哪些食材快到期，避免遗忘和浪费。",
+      "required_applications": [
+        "备忘录"
+      ],
+      "typical_users": [
+        "家庭用户",
+        "经常自己做饭的用户"
+      ],
+      "typical_states": [
+        "食材临近到期",
+        "准备做饭",
+        "采购后"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "待办标题",
+        "待办正文",
+        "提醒时间",
+        "是否有提醒",
+        "最近一次提醒时间",
+        "是否已完成"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "可复用备忘录待办和提醒字段展示已有记录；食材名称和保质期需要按统一格式写入内容。",
+      "data_semantics": "食材名称、购买日期和到期日期保存在待办标题或正文中。"
+    },
+    {
+      "scene_id": "steps_sleep_monitor",
+      "scene_name": "步数睡眠监测",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "运动监测",
+      "user_goal": "用户每天快速查看步数和睡眠状态，判断当天活动量与休息是否达标。",
+      "required_applications": [
+        "运动健康"
+      ],
+      "typical_users": [
+        "关注日常健康的用户",
+        "运动用户"
+      ],
+      "typical_states": [
+        "早晨查看睡眠",
+        "白天查看步数",
+        "运动后复盘"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "全天累计活动总步数",
+        "夜间正式睡眠的总时长",
+        "睡眠状态",
+        "睡眠综合得分"
+      ],
+      "candidate_actions": [
+        "跳转运动健康首页",
+        "跳转睡眠页"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "步数和睡眠字段及运动健康详情入口均已纳入当前能力清单。"
+    },
+    {
+      "scene_id": "pet_fed_tracker",
+      "scene_name": "今天喂猫/喂狗了吗",
+      "primary_category": "家庭、关系与照护",
+      "task_cluster": "宠物照护",
+      "user_goal": "出门前确认今天已经喂过宠物，避免漏喂或重复喂食。",
+      "required_applications": [
+        "备忘录",
+        "闹钟"
+      ],
+      "typical_users": [
+        "养宠物的独居青年",
+        "多宠家庭"
+      ],
+      "typical_states": [
+        "赶着出门",
+        "记不清是否喂过"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "both",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "待办标题",
+        "待办正文",
+        "是否已完成",
+        "完成时间",
+        "提醒时间",
+        "是否有提醒",
+        "最近一次提醒时间"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录",
+        "跳转闹钟"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "基于备忘录已有喂食记录和闹钟提醒展示；卡片内直接打卡需要额外写入动作。"
+    },
+    {
+      "scene_id": "car_maintenance_due",
+      "scene_name": "保养/年检到期提醒",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "车辆事务",
+      "user_goal": "用户上车前快速确认保养记录和年检是否临近到期。",
+      "required_applications": [
+        "备忘录",
+        "日历"
+      ],
+      "typical_users": [
+        "有车一族",
+        "容易忘记车辆事项的车主"
+      ],
+      "typical_states": [
+        "准备开车出门",
+        "保养或年检临近"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "both",
+      "frequency": "occasional",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "备忘录标题",
+        "备忘录正文",
+        "修改时间",
+        "日程标题",
+        "日程日期",
+        "日程倒数日",
+        "提醒时间"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录",
+        "跳转日程"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "基于备忘录已有保养记录和日历已有标注展示；卡片内新建日程或录入里程需要额外写入动作。"
+    },
+    {
+      "scene_id": "uv_air_quality_prep",
+      "scene_name": "出门防晒与空气质量参考",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "天气参考",
+      "user_goal": "用户出门前快速判断是否需要防晒、戴帽子或戴口罩。",
+      "required_applications": [
+        "天气"
+      ],
+      "typical_users": [
+        "注重护肤的用户",
+        "有过敏性鼻炎的用户"
+      ],
+      "typical_states": [
+        "准备出门",
+        "站在玄关换鞋"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "紫外线等级",
+        "空气质量",
+        "预警信息",
+        "当前温度",
+        "天气现象"
+      ],
+      "candidate_actions": [
+        "查询天气状况",
+        "跳转某个城市"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "按天气接口可返回紫外线、空气质量和防护参考结果处理，不新增独立天气数据字段。"
+    },
+    {
+      "scene_id": "calendar_today_remaining_check",
+      "scene_name": "当日剩余日程快速清点",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "日程与会议",
+      "user_goal": "用户下班前快速查看当天剩余日程，判断是否能够准时离开。",
+      "required_applications": [
+        "日历"
+      ],
+      "typical_users": [
+        "职场上班族",
+        "行政会务人员",
+        "日程密集的管理者"
+      ],
+      "typical_states": [
+        "临近下班",
+        "记不清当天安排",
+        "想确认能否准点走"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "日程标题",
+        "日程备注",
+        "日程开始时间",
+        "日程结束时间",
+        "查询到的日程记录总数量"
+      ],
+      "candidate_actions": [
+        "查询日程",
+        "跳转日程"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "剩余日程和预计剩余时长基于当天日程时间计算，不包含标记完成或延后提醒。"
+    },
+    {
+      "scene_id": "focus_remaining_time_view",
+      "scene_name": "专注剩余时长快速确认",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "专注工作",
+      "user_goal": "用户不退出当前应用就能确认专注模式还剩多久。",
+      "required_applications": [
+        "系统设置",
+        "日历",
+        "备忘录"
+      ],
+      "typical_users": [
+        "沉浸式办公的职场人",
+        "备考学生",
+        "做设计写代码的创作者"
+      ],
+      "typical_states": [
+        "专注工作中途",
+        "不想打断当前状态",
+        "需要确认结束时间"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "日程标题",
+        "日程结束时间",
+        "提醒时间",
+        "待办标题"
+      ],
+      "candidate_actions": [
+        "跳转日程",
+        "跳转到备忘录"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "剩余时长基于当前时间和日历/备忘录中的结束或提醒时间计算。"
+    },
+    {
+      "scene_id": "focus_end_reminder",
+      "scene_name": "专注结束前提醒",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "专注工作",
+      "user_goal": "用户在专注即将结束时提前知道，准备切换到下一项工作。",
+      "required_applications": [
+        "系统设置",
+        "日历",
+        "备忘录"
+      ],
+      "typical_users": [
+        "沉浸式办公的职场人",
+        "备考学生",
+        "创作者"
+      ],
+      "typical_states": [
+        "专注即将结束",
+        "下一场安排临近",
+        "不想错过时间"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "日程结束时间",
+        "提醒时间",
+        "是否有提醒",
+        "最近一次提醒时间"
+      ],
+      "candidate_actions": [
+        "跳转日程",
+        "跳转到备忘录"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "支持展示已有日历或备忘录提醒，不包含卡片内创建或修改提醒。"
+    },
+    {
+      "scene_id": "important_contact_quick_dial",
+      "scene_name": "重要联系人一键拨号",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "通话联络",
+      "user_goal": "用户在赶路或手上不方便时快速拨打常用重要联系人。",
+      "required_applications": [
+        "电话"
+      ],
+      "typical_users": [
+        "需要联系家人的用户",
+        "高频联系客户的用户"
+      ],
+      "typical_states": [
+        "赶路中",
+        "手上拿着物品",
+        "需要立即联系对方"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "联系人（人名、手机号）"
+      ],
+      "candidate_actions": [
+        "拨打电话",
+        "跳转到电话主页"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "依赖联系人已存在，卡片不负责创建或修改联系人。"
+    },
+    {
+      "scene_id": "sleep_next_day_duration_forecast",
+      "scene_name": "次日睡眠时长预估",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "睡眠规划",
+      "user_goal": "用户睡前根据已有起床提醒快速确认今晚还能睡多久。",
+      "required_applications": [
+        "闹钟",
+        "备忘录",
+        "日历"
+      ],
+      "typical_users": [
+        "上班族",
+        "备考学生",
+        "关注睡眠健康的用户"
+      ],
+      "typical_states": [
+        "准备睡觉",
+        "已有次日起床提醒",
+        "担心睡眠不足"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "提醒时间",
+        "日程日期",
+        "日程开始时间"
+      ],
+      "candidate_actions": [
+        "跳转闹钟",
+        "跳转到备忘录",
+        "跳转日程"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "预计睡眠时长由当前时间和已有提醒时间计算，不包含卡片内调整闹钟。"
+    },
+    {
+      "scene_id": "sleep_insufficient_risk",
+      "scene_name": "睡眠不足风险提醒",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "睡眠监测",
+      "user_goal": "用户早上快速确认昨晚睡眠是否不足，并决定当天是否需要调整安排。",
+      "required_applications": [
+        "运动健康"
+      ],
+      "typical_users": [
+        "关注睡眠健康的用户",
+        "工作压力较大的用户",
+        "备考学生"
+      ],
+      "typical_states": [
+        "睡眠时长偏短",
+        "睡眠得分偏低",
+        "白天状态担忧"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "夜间正式睡眠的总时长",
+        "睡眠状态",
+        "睡眠综合得分"
+      ],
+      "candidate_actions": [
+        "跳转睡眠页"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "风险结论仅基于已有睡眠字段，不延伸为医疗诊断或连续趋势分析。"
+    },
+    {
+      "scene_id": "call_last_record_quick_view",
+      "scene_name": "联系人最近通话快速查",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "通话联络",
+      "user_goal": "用户回电前快速确认联系人和最近通话信息，避免沟通脱节。",
+      "required_applications": [
+        "电话"
+      ],
+      "typical_users": [
+        "销售商务人员",
+        "客服对接岗",
+        "对接多客户的职场人"
+      ],
+      "typical_states": [
+        "准备回电",
+        "记不清上次沟通",
+        "担心说错信息"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "联系人（人名、手机号）",
+        "通话记录",
+        "通话时长",
+        "电话号码"
+      ],
+      "candidate_actions": [
+        "拨打电话",
+        "跳转到电话主页"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "基于已有通话记录和通话时长展示，不承诺通话备注字段。"
+    },
+    {
+      "scene_id": "driving_focus_mode",
+      "scene_name": "开车驾驶专注模式",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "驾驶与常用目的地",
+      "user_goal": "用户上车后快速开启驾驶专注，减少消息打扰和分心操作。",
+      "required_applications": [
+        "系统设置"
+      ],
+      "typical_users": [
+        "自驾通勤族",
+        "网约车司机",
+        "经常开车出差的人"
+      ],
+      "typical_states": [
+        "刚上车准备出发",
+        "行驶中",
+        "不方便操作手机"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 2,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [],
+      "candidate_actions": [
+        "开启专注免打扰开关"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "support_review_status": "user_confirmed_supported",
+      "capability_note": "直接复用系统已有专注和免打扰开关，不要求新增驾驶专属模式；驾驶中仍应优先停车后操作。"
+    },
+    {
+      "scene_id": "meeting_agenda_preview",
+      "scene_name": "进会议室前温习议题",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "日程与会议",
+      "user_goal": "用户进会议室前快速回顾会议主题、议程和上次记录，避免临场想不起重点。",
+      "required_applications": [
+        "日历",
+        "备忘录"
+      ],
+      "typical_users": [
+        "外勤业务员",
+        "多地点办公职场人",
+        "跑会的市场人员"
+      ],
+      "typical_states": [
+        "会议即将开始",
+        "刚到会议室门口",
+        "手上拿着材料"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "日程标题",
+        "日程备注",
+        "日程开始时间",
+        "备忘录正文",
+        "备忘录标题"
+      ],
+      "candidate_actions": [
+        "查询日程",
+        "跳转日程",
+        "跳转到备忘录"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "日历议程字段和备忘录记录字段均已登记，适合做只读速览。"
+    },
+    {
+      "scene_id": "bedtime_sleep_mode",
+      "scene_name": "睡前一键开启睡眠模式",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "睡眠规划",
+      "user_goal": "用户睡前快速开启睡眠模式，减少夜间通知和来电打扰。",
+      "required_applications": [
+        "系统设置"
+      ],
+      "typical_users": [
+        "需要规律作息的用户",
+        "加班用户",
+        "备考学生"
+      ],
+      "typical_states": [
+        "准备睡觉",
+        "夜间休息",
+        "担心被消息打扰"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [],
+      "candidate_actions": [
+        "模式切换（免打扰、睡眠、学习）"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "将原本不支持的充电保护改为已有的睡眠模式切换，不承诺设置充电上限。"
+    },
+    {
+      "scene_id": "pre_sleep_charging_check",
+      "scene_name": "睡前确认手机是否在充电",
+      "primary_category": "设备与数字管理",
+      "task_cluster": "设备充电",
+      "user_goal": "用户睡前快速确认手机正在充电，避免第二天醒来发现电量不足。",
+      "required_applications": [
+        "电池",
+        "系统设置"
+      ],
+      "typical_users": [
+        "夜间需要充电的用户",
+        "经常忘记插充电器的用户"
+      ],
+      "typical_states": [
+        "准备睡觉",
+        "手机电量偏低",
+        "刚接入充电器"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "充电状态",
+        "设备连接的充电器类型"
+      ],
+      "candidate_actions": [
+        "跳转到电池设置页面"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "仅确认当前充电状态，不包含充电保护、充满时间或充电上限设置。"
+    },
+    {
+      "scene_id": "headset_connection_battery_check",
+      "scene_name": "耳机连接与电量快速确认",
+      "primary_category": "设备与数字管理",
+      "task_cluster": "耳机设备状态",
+      "user_goal": "用户使用耳机前快速确认是否已连接以及左右耳和充电盒电量。",
+      "required_applications": [
+        "系统设置"
+      ],
+      "typical_users": [
+        "通勤听歌用户",
+        "运动用户"
+      ],
+      "typical_states": [
+        "准备听歌",
+        "准备运动",
+        "担心耳机没电"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "蓝牙耳机当前是否有蓝牙耳机处于连接",
+        "耳机的设备名称",
+        "耳机盒（或整体）的当前电量百分比",
+        "左耳机的当前电量百分比",
+        "右耳机的当前电量百分比"
+      ],
+      "candidate_actions": [],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "替代原本不支持的耳机查找和降噪切换，范围限定为当前蓝牙连接及电量状态。"
+    },
+    {
+      "scene_id": "post_sedentary_activity_check",
+      "scene_name": "久坐后快速查看今日运动状态",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "运动监测",
+      "user_goal": "用户久坐后快速确认今天的步数、活动量和运动时长。",
+      "required_applications": [
+        "运动健康"
+      ],
+      "typical_users": [
+        "办公室用户",
+        "备考学生",
+        "居家办公用户"
+      ],
+      "typical_states": [
+        "久坐后",
+        "准备活动",
+        "担心当天运动不足"
+      ],
+      "card_fit": "candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "全天累计活动总步数",
+        "活动总距离",
+        "总消耗热量"
+      ],
+      "candidate_actions": [
+        "跳转运动健康首页"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "不承诺自动识别久坐或直接完成打卡，卡片提供运动状态查看入口。"
+    },
+    {
+      "scene_id": "post_exercise_summary",
+      "scene_name": "运动后快速查看运动消耗",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "运动复盘",
+      "user_goal": "用户运动结束后快速确认本次运动时长、热量和心率情况。",
+      "required_applications": [
+        "运动健康"
+      ],
+      "typical_users": [
+        "健身用户",
+        "跑步用户",
+        "减脂用户"
+      ],
+      "typical_states": [
+        "刚结束运动",
+        "准备复盘",
+        "关注运动效果"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "运动训练类型",
+        "总消耗热量",
+        "运动期间的平均心率"
+      ],
+      "candidate_actions": [
+        "跳转运动健康首页",
+        "跳转锻炼时长页"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "展示已有运动记录，不生成饮水量或医学恢复建议。"
+    },
+    {
+      "scene_id": "child_pickup_reminder",
+      "scene_name": "孩子放学接送提醒快速查看",
+      "primary_category": "家庭、关系与照护",
+      "task_cluster": "家庭接送",
+      "user_goal": "家长接孩子前快速确认接送时间、地点和备注，避免忘记安排。",
+      "required_applications": [
+        "备忘录"
+      ],
+      "typical_users": [
+        "新手宝妈/宝爸",
+        "需要接送孩子的家长"
+      ],
+      "typical_states": [
+        "放学前",
+        "准备出门接孩子",
+        "临时确认接送安排"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "待办标题",
+        "关联位置",
+        "提醒时间",
+        "待办正文",
+        "是否已完成"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "基于家长预先记录的接送事项，不提供孩子实时位置。"
+    },
+    {
+      "scene_id": "parent_activity_reminder_check",
+      "scene_name": "父母活动安排和提醒快速查看",
+      "primary_category": "家庭、关系与照护",
+      "task_cluster": "长辈关怀",
+      "user_goal": "用户快速确认父母当天的活动安排和需要关注的提醒。",
+      "required_applications": [
+        "备忘录"
+      ],
+      "typical_users": [
+        "关注父母的成年子女",
+        "异地照看父母的用户"
+      ],
+      "typical_states": [
+        "早晨查看安排",
+        "担心遗漏提醒",
+        "准备联系父母"
+      ],
+      "card_fit": "candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "occasional",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "备忘录标题",
+        "备忘录正文",
+        "提醒时间",
+        "是否有提醒",
+        "最近一次提醒时间"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "支持查看预先记录的活动安排，不等同于远程监测父母实时活动状态。"
+    },
+    {
+      "scene_id": "family_arrival_confirmation",
+      "scene_name": "家人到家确认提醒",
+      "primary_category": "家庭、关系与照护",
+      "task_cluster": "家庭安全",
+      "user_goal": "用户在约定时间快速查看家人到家确认事项，避免遗漏联系。",
+      "required_applications": [
+        "备忘录"
+      ],
+      "typical_users": [
+        "有家庭照看需求的用户",
+        "与家人共同生活的用户"
+      ],
+      "typical_states": [
+        "家人预计到家",
+        "等待确认",
+        "准备联系家人"
+      ],
+      "card_fit": "candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "occasional",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "关联位置",
+        "提醒时间",
+        "是否已完成",
+        "待办标题"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "改为手动记录和确认提醒，不提供自动地理围栏或家人实时位置。"
+    },
+    {
+      "scene_id": "laundry_rain_check",
+      "scene_name": "晾衣服前看会不会下雨",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "天气参考",
+      "user_goal": "用户晾衣服前快速确认近期是否有雨，避免衣物被雨淋湿。",
+      "required_applications": [
+        "天气"
+      ],
+      "typical_users": [
+        "家庭主妇/主夫",
+        "租房用户",
+        "习惯手洗衣物的老人"
+      ],
+      "typical_states": [
+        "端着洗衣盆",
+        "手还湿着",
+        "站在阳台看天"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 2,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "天气现象"
+      ],
+      "candidate_actions": [
+        "查询天气状况"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "提示信息随天气数据刷新展示在卡片上，不包含创建系统级下雨通知或收衣提醒。"
+    },
+    {
+      "scene_id": "trip_weather_peek",
+      "scene_name": "出差前看目的地天气",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "天气参考",
+      "user_goal": "用户收拾行李前快速确认出差目的地的天气，决定带什么衣物和是否带伞。",
+      "required_applications": [
+        "天气"
+      ],
+      "typical_users": [
+        "商务差旅人士",
+        "节假日出游用户",
+        "异地探亲用户"
+      ],
+      "typical_states": [
+        "正在收拾行李",
+        "晚上睡前",
+        "担心带错衣物"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "occasional",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "当前温度",
+        "天气现象"
+      ],
+      "candidate_actions": [
+        "查询天气状况",
+        "跳转某个城市"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "出差目的地作为 query 中的明确地点参数传入，不依赖从日历或车票自动识别城市。"
+    },
+    {
+      "scene_id": "weather_dress_guide_quick",
+      "scene_name": "出门穿衣建议速看",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "天气参考",
+      "user_goal": "用户出门前快速确认体感和穿衣建议，避免穿多或穿少。",
+      "required_applications": [
+        "天气"
+      ],
+      "typical_users": [
+        "通勤上班族",
+        "上学学生",
+        "带娃出门的家长"
+      ],
+      "typical_states": [
+        "出门前赶时间",
+        "降温升温拿不准",
+        "怕穿多或穿少"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "体感温度"
+      ],
+      "candidate_actions": [
+        "查询天气状况"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "穿衣结论只使用天气 API 返回的穿衣指数，不额外生成个性化穿搭建议。"
+    },
+    {
+      "scene_id": "weather_impact_agenda",
+      "scene_name": "天气对日程的影响预判",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "天气参考",
+      "user_goal": "用户快速对照当天日程与天气，自己判断户外安排是否需要调整。",
+      "required_applications": [
+        "天气",
+        "日历"
+      ],
+      "typical_users": [
+        "有户外活动计划的人",
+        "需要遛狗的人",
+        "计划晚上跑步的人"
+      ],
+      "typical_states": [
+        "早上刚起床",
+        "当天有户外安排",
+        "不确定天气是否影响计划"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "日程标题",
+        "日程开始时间",
+        "天气现象"
+      ],
+      "candidate_actions": [
+        "查询日程",
+        "查询天气状况",
+        "跳转日程"
+      ],
+      "implementation_classification": "candidate_implementable",
+      "capability_note": "卡片只并列展示日程和天气，不提供自动影响判断、日程调整或替代方案。"
+    },
+    {
+      "scene_id": "weather_dual_city_compare",
+      "scene_name": "双城天气对比",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "天气参考",
+      "user_goal": "用户不用切换城市就能对比两地天气，关心家人、出差地或异地工作地天气。",
+      "typical_users": [
+        "异地工作者",
+        "家有老人的子女",
+        "出差人士"
+      ],
+      "typical_states": [
+        "温差明显",
+        "恶劣天气"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "城市名",
+        "当前温度",
+        "天气现象",
+        "体感温度",
+        "预警信息"
+      ],
+      "candidate_actions": [
+        "查询天气状况",
+        "跳转某个城市"
+      ]
+    },
+    {
+      "scene_id": "schedule_weather_prep",
+      "scene_name": "日程天气准备",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "天气参考",
+      "user_goal": "根据最近日程的时间地点提前看天气，辅助穿衣、带伞或改期。",
+      "typical_users": [
+        "上班族",
+        "出差人士",
+        "学生"
+      ],
+      "typical_states": [
+        "会前",
+        "出差前",
+        "户外活动前"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "日程标题",
+        "日程开始时间",
+        "日程地址",
+        "城市名",
+        "当前温度",
+        "天气现象",
+        "体感温度",
+        "预警信息"
+      ],
+      "candidate_actions": [
+        "查询日程",
+        "查询天气状况"
+      ]
+    },
+    {
+      "scene_id": "schedule_memo_check",
+      "scene_name": "日程备忘核对",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "日程与会议",
+      "user_goal": "同时看到当前日程和关联备忘要点或待办，避免漏材料。",
+      "typical_users": [
+        "上班族",
+        "学生",
+        "教师"
+      ],
+      "typical_states": [
+        "会议前",
+        "出行前",
+        "学习前"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "日程标题",
+        "日程开始时间",
+        "日程地址",
+        "日程备注",
+        "备忘录标题",
+        "备忘录正文",
+        "待办标题"
+      ],
+      "candidate_actions": [
+        "查询日程",
+        "跳转日程",
+        "跳转到备忘录"
+      ]
+    },
+    {
+      "scene_id": "schedule_quick_contact",
+      "scene_name": "日程快捷联系",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "通话联络",
+      "user_goal": "会议或预约到点前直接联系日程相关人员，省去搜索通讯录。",
+      "typical_users": [
+        "上班族",
+        "销售",
+        "教师"
+      ],
+      "typical_states": [
+        "会议前",
+        "预约到点",
+        "客户拜访前"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "日程标题",
+        "日程开始时间",
+        "联系人（人名、手机号）"
+      ],
+      "candidate_actions": [
+        "查询日程",
+        "拨打电话"
+      ]
+    },
+    {
+      "scene_id": "schedule_sport_readiness",
+      "scene_name": "日程运动状态",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "运动监测",
+      "user_goal": "把训练安排与睡眠、心率、步数放在一起，帮助决定是否运动。",
+      "typical_users": [
+        "健身爱好者",
+        "康复人群",
+        "跑者"
+      ],
+      "typical_states": [
+        "晨跑前",
+        "比赛前",
+        "康复期"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "日程标题",
+        "日程开始时间",
+        "睡眠综合得分",
+        "夜间正式睡眠的总时长",
+        "全天累计活动总步数",
+        "运动期间的平均心率"
+      ],
+      "candidate_actions": [
+        "查询日程",
+        "跳转运动健康首页"
+      ]
+    },
+    {
+      "scene_id": "schedule_location_navigation",
+      "scene_name": "日程地点导航",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "驾驶与常用目的地",
+      "user_goal": "展示日程地点与开始时间，点击直接导航，省去复制地址。",
+      "typical_users": [
+        "上班族",
+        "销售",
+        "出差人士"
+      ],
+      "typical_states": [
+        "下一场会议前",
+        "客户拜访前",
+        "赶航班前"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "日程标题",
+        "日程开始时间",
+        "日程地址"
+      ],
+      "candidate_actions": [
+        "查询日程",
+        "跳转去导航"
+      ]
+    },
+    {
+      "scene_id": "weather_care_contact",
+      "scene_name": "天气关怀联系",
+      "primary_category": "家庭、关系与照护",
+      "task_cluster": "长辈关怀",
+      "user_goal": "天气风险时查看家人所在地天气，一键联系父母或孩子。",
+      "typical_users": [
+        "家有老人的子女",
+        "异地家庭"
+      ],
+      "typical_states": [
+        "降温",
+        "暴雨",
+        "空气差"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "occasional",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "城市名",
+        "当前温度",
+        "天气现象",
+        "预警信息",
+        "联系人（人名、手机号）"
+      ],
+      "candidate_actions": [
+        "查询天气状况",
+        "拨打电话"
+      ]
+    },
+    {
+      "scene_id": "weather_battery_protect",
+      "scene_name": "天气与电池保护",
+      "primary_category": "设备与数字管理",
+      "task_cluster": "设备充电",
+      "user_goal": "高温低温或户外时同时确认天气与设备温度、电量，降低断电过热焦虑。",
+      "typical_users": [
+        "户外工作者",
+        "通勤族"
+      ],
+      "typical_states": [
+        "高温",
+        "低温",
+        "充电中",
+        "户外使用"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "当前温度",
+        "天气现象",
+        "预警信息",
+        "手机设备剩余电池电量百分比纯数字",
+        "充电状态",
+        "电池的实时温度"
+      ],
+      "candidate_actions": [
+        "查询天气状况",
+        "跳转到电池设置页面"
+      ]
+    },
+    {
+      "scene_id": "weather_sport_decision",
+      "scene_name": "天气运动决策",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "运动监测",
+      "user_goal": "户外运动前看天气、空气和身体状态，决定户外、室内替代或降低强度。",
+      "typical_users": [
+        "跑者",
+        "骑行爱好者",
+        "散步人群"
+      ],
+      "typical_states": [
+        "晨跑前",
+        "骑行前",
+        "雾霾天"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "城市名",
+        "天气现象",
+        "空气质量",
+        "当前温度",
+        "体感温度",
+        "全天累计活动总步数",
+        "睡眠综合得分"
+      ],
+      "candidate_actions": [
+        "查询天气状况",
+        "跳转运动健康首页"
+      ]
+    },
+    {
+      "scene_id": "weather_photo_prep",
+      "scene_name": "天气摄影准备",
+      "primary_category": "内容、娱乐与创作",
+      "task_cluster": "拍摄创作",
+      "user_goal": "判断天气是否适合拍摄，提供相机入口，快速抓住短暂拍摄窗口。",
+      "typical_users": [
+        "摄影爱好者",
+        "旅行者",
+        "内容创作者"
+      ],
+      "typical_states": [
+        "出门拍摄前",
+        "雪景",
+        "雨后"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "occasional",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "城市名",
+        "当前温度",
+        "天气现象",
+        "体感温度",
+        "紫外线等级",
+        "预警信息"
+      ],
+      "candidate_actions": [
+        "查询天气状况",
+        "跳转到相机界面"
+      ]
+    },
+    {
+      "scene_id": "memo_call_briefing",
+      "scene_name": "备忘电话沟通",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "通话联络",
+      "user_goal": "通话前显示要点和联系人，点击直接拨打，避免说漏重点。",
+      "typical_users": [
+        "客服",
+        "面试者",
+        "子女"
+      ],
+      "typical_states": [
+        "客户投诉前",
+        "面试前",
+        "家人关怀前"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "occasional",
+      "physical_constraint": 0,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "备忘录标题",
+        "备忘录正文",
+        "待办标题",
+        "联系人（人名、手机号）"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录",
+        "拨打电话"
+      ]
+    },
+    {
+      "scene_id": "memo_sport_execution",
+      "scene_name": "备忘运动执行",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "运动监测",
+      "user_goal": "对照备忘录中的计划、目标和实际运动数据，减少切换应用。",
+      "typical_users": [
+        "健身爱好者",
+        "减脂人群"
+      ],
+      "typical_states": [
+        "训练中",
+        "跑步后",
+        "饮食管理"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "待办标题",
+        "待办正文",
+        "运动训练类型",
+        "运动开始的确切时刻",
+        "运动结束的确切时刻",
+        "运动所产生的净热量消耗"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录",
+        "跳转锻炼时长页"
+      ]
+    },
+    {
+      "scene_id": "memo_location_navigation",
+      "scene_name": "备忘地点导航",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "驾驶与常用目的地",
+      "user_goal": "展示备忘中的地址和事项，点击直接导航。",
+      "typical_users": [
+        "看房者",
+        "旅行者",
+        "采购者"
+      ],
+      "typical_states": [
+        "看房前",
+        "旅行中",
+        "采购前"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "occasional",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "备忘录标题",
+        "备忘录正文",
+        "待办标题",
+        "关联位置"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录",
+        "跳转去导航"
+      ]
+    },
+    {
+      "scene_id": "memo_focus_setup",
+      "scene_name": "备忘专注设置",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "专注工作",
+      "user_goal": "显示任务摘要，一键开启勿扰、睡眠或专注模式。",
+      "typical_users": [
+        "学生",
+        "上班族"
+      ],
+      "typical_states": [
+        "学习前",
+        "开会前",
+        "睡前整理"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "待办标题",
+        "待办正文",
+        "备忘录标题"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录",
+        "模式切换（免打扰、睡眠、学习）",
+        "开启专注免打扰开关"
+      ]
+    },
+    {
+      "scene_id": "outdoor_sport_device_guard",
+      "scene_name": "户外运动设备保障",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "运动监测",
+      "user_goal": "长时间运动时同时看运动进度、电量、设备温度和省电入口，避免记录中断。",
+      "typical_users": [
+        "长跑者",
+        "徒步者",
+        "骑行者"
+      ],
+      "typical_states": [
+        "长跑中",
+        "徒步中",
+        "骑行中"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 2,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "运动训练类型",
+        "运动开始的确切时刻",
+        "运动结束的确切时刻",
+        "运动期间的平均心率",
+        "手机设备剩余电池电量百分比纯数字",
+        "电池的实时温度"
+      ],
+      "candidate_actions": [
+        "跳转锻炼时长页",
+        "一键开启省电模式",
+        "跳转到电池设置页面"
+      ]
+    },
+    {
+      "scene_id": "shooting_battery_check",
+      "scene_name": "拍摄续航确认",
+      "primary_category": "内容、娱乐与创作",
+      "task_cluster": "拍摄创作",
+      "user_goal": "拍摄前看电量、温度，判断能否继续拍。",
+      "typical_users": [
+        "摄影爱好者",
+        "旅行者"
+      ],
+      "typical_states": [
+        "旅行中",
+        "重要活动前",
+        "低电量"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "手机设备剩余电池电量百分比纯数字",
+        "充电状态",
+        "电池的实时温度",
+        "设备电池电量等级"
+      ],
+      "candidate_actions": [
+        "跳转到相机界面",
+        "跳转到电池设置页面"
+      ]
+    },
+    {
+      "scene_id": "sport_focus_mode",
+      "scene_name": "运动沉浸模式",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "运动监测",
+      "user_goal": "运动中一键免打扰，同时展示耳机连接或电量，减少打扰。",
+      "typical_users": [
+        "跑者",
+        "健身者",
+        "骑行者"
+      ],
+      "typical_states": [
+        "跑步中",
+        "健身中",
+        "骑行中"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 2,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "运动训练类型",
+        "运动期间的平均心率",
+        "蓝牙耳机当前是否有蓝牙耳机处于连接",
+        "耳机的设备名称",
+        "左耳机的当前电量百分比"
+      ],
+      "candidate_actions": [
+        "开启专注免打扰开关",
+        "跳转运动健康首页"
+      ]
+    },
+    {
+      "scene_id": "sport_music_control",
+      "scene_name": "运动听歌控制",
+      "primary_category": "内容、娱乐与创作",
+      "task_cluster": "耳机音乐播控",
+      "user_goal": "运动时显示核心运动数据，并提供歌单跳转入口（播放/暂停/切歌不在当前动作清单，仅保留跳转歌单）。",
+      "typical_users": [
+        "跑者",
+        "健身者",
+        "瑜伽爱好者"
+      ],
+      "typical_states": [
+        "跑步中",
+        "健身中",
+        "瑜伽中"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "运动训练类型",
+        "运动开始的确切时刻",
+        "运动结束的确切时刻",
+        "运动期间的平均心率",
+        "全天累计活动总步数"
+      ],
+      "candidate_actions": [
+        "跳转锻炼时长页",
+        "跳转到每日30首和收藏页面"
+      ]
+    },
+    {
+      "scene_id": "music_focus_sleep",
+      "scene_name": "音乐专注助眠",
+      "primary_category": "内容、娱乐与创作",
+      "task_cluster": "耳机音乐播控",
+      "user_goal": "音乐入口结合耳机、勿扰或睡眠模式，减少多次设置。",
+      "typical_users": [
+        "上班族",
+        "学生",
+        "通勤族"
+      ],
+      "typical_states": [
+        "工作专注",
+        "通勤",
+        "睡前"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "蓝牙耳机当前是否有蓝牙耳机处于连接",
+        "耳机的设备名称",
+        "左耳机的当前电量百分比",
+        "右耳机的当前电量百分比"
+      ],
+      "candidate_actions": [
+        "跳转音乐首页",
+        "跳转到每日30首和收藏页面",
+        "模式切换（免打扰、睡眠、学习）"
+      ]
+    },
+    {
+      "scene_id": "current_location_navigation",
+      "scene_name": "当前位置快捷导航",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "驾驶与常用目的地",
+      "user_goal": "展示当前位置，一键导航到家的常用目的地。",
+      "typical_users": [
+        "通勤族",
+        "外勤人员",
+        "旅行者"
+      ],
+      "typical_states": [
+        "下班回家",
+        "外勤转场",
+        "旅行返程"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "位置经纬度"
+      ],
+      "candidate_actions": [
+        "跳转去导航"
+      ]
+    },
+    {
+      "scene_id": "schedule_wakeup_check",
+      "scene_name": "日程起床确认",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "日程与会议",
+      "user_goal": "闹钟响起刚醒时，一眼确认第一场日程与准备时间，并进入闹钟处理响铃。",
+      "typical_users": [
+        "上班族",
+        "学生"
+      ],
+      "typical_states": [
+        "刚醒",
+        "闹钟响起"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "日程标题",
+        "日程开始时间",
+        "日程倒数日",
+        "提醒时间"
+      ],
+      "candidate_actions": [
+        "查询日程",
+        "跳转闹钟"
+      ]
+    },
+    {
+      "scene_id": "bedtime_tomorrow_plan",
+      "scene_name": "睡前明日安排",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "睡眠规划",
+      "user_goal": "睡前确认明天要做什么，同时看次日首个安排、闹钟和睡眠模式入口。",
+      "typical_users": [
+        "上班族",
+        "学生"
+      ],
+      "typical_states": [
+        "睡前"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "日程标题",
+        "日程开始时间",
+        "日程日期",
+        "提醒时间"
+      ],
+      "candidate_actions": [
+        "查询日程",
+        "跳转闹钟",
+        "模式切换（免打扰、睡眠、学习）"
+      ]
+    },
+    {
+      "scene_id": "trip_luggage_weather",
+      "scene_name": "出行行李天气核对",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "天气参考",
+      "user_goal": "出差、自驾游或户外会议前，将日程、行李备忘和目的地天气汇总，避免漏带物品。",
+      "typical_users": [
+        "出差人士",
+        "自驾游用户",
+        "户外会议人员"
+      ],
+      "typical_states": [
+        "出差前",
+        "自驾游前",
+        "户外会议前"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "occasional",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "备忘录标题",
+        "待办标题",
+        "待办正文",
+        "城市名",
+        "当前温度",
+        "天气现象",
+        "预警信息"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录",
+        "查询天气状况"
+      ]
+    },
+    {
+      "scene_id": "training_plan_confirm",
+      "scene_name": "训练计划完成确认",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "运动监测",
+      "user_goal": "训练日同时看到训练计划、完成情况和当前身体状态。",
+      "typical_users": [
+        "健身爱好者",
+        "康复人群"
+      ],
+      "typical_states": [
+        "训练日",
+        "康复期",
+        "比赛周"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "待办标题",
+        "待办正文",
+        "运动训练类型",
+        "运动开始的确切时刻",
+        "运动结束的确切时刻",
+        "运动所产生的净热量消耗",
+        "全天累计活动总步数"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录",
+        "跳转锻炼时长页"
+      ]
+    },
+    {
+      "scene_id": "bad_weather_reschedule",
+      "scene_name": "恶劣天气改约",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "日程与会议",
+      "user_goal": "台风、高温、暴雨影响客户会面时，展示相关日程和天气风险，点击直接联系对方协商。",
+      "typical_users": [
+        "销售",
+        "上班族"
+      ],
+      "typical_states": [
+        "台风",
+        "高温",
+        "暴雨"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "occasional",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "日程标题",
+        "日程开始时间",
+        "日程日期",
+        "日程地址",
+        "当前温度",
+        "天气现象",
+        "预警信息",
+        "联系人（人名、手机号）"
+      ],
+      "candidate_actions": [
+        "查询日程",
+        "查询天气状况",
+        "拨打电话"
+      ]
+    },
+    {
+      "scene_id": "arrival_contact_navigation",
+      "scene_name": "到达前联系与导航",
+      "primary_category": "出行与环境决策",
+      "task_cluster": "驾驶与常用目的地",
+      "user_goal": "去见客户、接人、赴约过程中，确认目的地和联系人，减少找路与找人的切换。",
+      "typical_users": [
+        "销售",
+        "通勤族"
+      ],
+      "typical_states": [
+        "赴约中",
+        "接人中"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "位置经纬度",
+        "日程地址",
+        "联系人（人名、手机号）"
+      ],
+      "candidate_actions": [
+        "跳转去导航",
+        "拨打电话"
+      ]
+    },
+    {
+      "scene_id": "low_battery_safety_contact",
+      "scene_name": "低电量安全联络",
+      "primary_category": "设备与数字管理",
+      "task_cluster": "续航管理",
+      "user_goal": "夜跑、自驾、外出低电量时看电量和当前位置，快速联系家人或救援联系人。",
+      "typical_users": [
+        "夜跑者",
+        "自驾用户",
+        "外出行人"
+      ],
+      "typical_states": [
+        "夜跑中",
+        "自驾中",
+        "低电量"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 2,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "手机设备剩余电池电量百分比纯数字",
+        "充电状态",
+        "位置经纬度",
+        "联系人（人名、手机号）"
+      ],
+      "candidate_actions": [
+        "跳转到电池设置页面",
+        "拨打电话"
+      ]
+    },
+    {
+      "scene_id": "memo_timed_reminder",
+      "scene_name": "备忘定时提醒",
+      "primary_category": "家庭、关系与照护",
+      "task_cluster": "居家事务",
+      "user_goal": "展示服药、喂宠物、烹饪等容易遗忘事项的记录，点击进入闹钟设置提醒。",
+      "typical_users": [
+        "服药人群",
+        "宠物主",
+        "做饭人群"
+      ],
+      "typical_states": [
+        "临近服药时间",
+        "喂食时间",
+        "烹饪中"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "备忘录标题",
+        "备忘录正文",
+        "待办标题",
+        "提醒时间",
+        "是否已完成"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录",
+        "跳转闹钟"
+      ]
+    },
+    {
+      "scene_id": "evening_todo_wrapup",
+      "scene_name": "晚间待办收尾",
+      "primary_category": "个人时间与效率",
+      "task_cluster": "待办管理",
+      "user_goal": "睡前查看关键待办和提醒，并进入睡眠或专注设置。",
+      "typical_users": [
+        "学生",
+        "上班族"
+      ],
+      "typical_states": [
+        "睡前",
+        "复习结束",
+        "晨跑前夜"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "待办标题",
+        "待办总数",
+        "已完成数",
+        "未完成数",
+        "提醒时间",
+        "是否已完成"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录",
+        "模式切换（免打扰、睡眠、学习）"
+      ]
+    },
+    {
+      "scene_id": "photo_trip_check",
+      "scene_name": "摄影出发检查",
+      "primary_category": "内容、娱乐与创作",
+      "task_cluster": "拍摄创作",
+      "user_goal": "旅行、雪景、外拍前同时核对拍摄清单、天气和相机入口。",
+      "typical_users": [
+        "摄影爱好者",
+        "旅行者"
+      ],
+      "typical_states": [
+        "旅行前",
+        "雪景前",
+        "外拍前"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "occasional",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "备忘录标题",
+        "待办标题",
+        "待办正文",
+        "城市名",
+        "天气现象",
+        "当前温度",
+        "紫外线等级"
+      ],
+      "candidate_actions": [
+        "跳转到备忘录",
+        "查询天气状况",
+        "跳转到相机界面"
+      ]
+    },
+    {
+      "scene_id": "extreme_weather_shooting_guard",
+      "scene_name": "极端天气拍摄保护",
+      "primary_category": "内容、娱乐与创作",
+      "task_cluster": "拍摄创作",
+      "user_goal": "高温低温天气拍照前，看气温、电池状态与相机入口，提示设备续航和温控风险。",
+      "typical_users": [
+        "摄影爱好者",
+        "户外拍摄者"
+      ],
+      "typical_states": [
+        "高温",
+        "低温",
+        "外拍前"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "occasional",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "当前温度",
+        "天气现象",
+        "预警信息",
+        "手机设备剩余电池电量百分比纯数字",
+        "电池的实时温度",
+        "充电状态"
+      ],
+      "candidate_actions": [
+        "查询天气状况",
+        "跳转到相机界面",
+        "跳转到电池设置页面"
+      ]
+    },
+    {
+      "scene_id": "low_battery_trip_guard",
+      "scene_name": "低电量出行保障",
+      "primary_category": "设备与数字管理",
+      "task_cluster": "续航管理",
+      "user_goal": "远途骑行、夜间外出、紧急移动时看续航、进入导航，并可快速联系同行或家人。",
+      "typical_users": [
+        "骑行者",
+        "夜行人",
+        "紧急外出者"
+      ],
+      "typical_states": [
+        "远途骑行",
+        "夜间外出",
+        "紧急移动"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 2,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "手机设备剩余电池电量百分比纯数字",
+        "充电状态",
+        "位置经纬度",
+        "联系人（人名、手机号）"
+      ],
+      "candidate_actions": [
+        "跳转去导航",
+        "拨打电话",
+        "一键开启省电模式"
+      ]
+    },
+    {
+      "scene_id": "sleep_alarm_adjust",
+      "scene_name": "睡眠与闹钟调整",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "睡眠规划",
+      "user_goal": "刚醒、晨跑前、午休前根据睡眠、心率、步数决定延迟闹钟、起床或设置下一次提醒。",
+      "typical_users": [
+        "上班族",
+        "跑者",
+        "学生"
+      ],
+      "typical_states": [
+        "刚醒",
+        "晨跑前",
+        "午休前"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "睡眠综合得分",
+        "夜间正式睡眠的总时长",
+        "晚上入睡时刻",
+        "白天醒来时刻",
+        "全天累计活动总步数",
+        "运动期间的平均心率"
+      ],
+      "candidate_actions": [
+        "跳转睡眠页",
+        "跳转闹钟"
+      ]
+    },
+    {
+      "scene_id": "sleep_music_alarm",
+      "scene_name": "助眠音乐与闹钟",
+      "primary_category": "健康、运动与作息",
+      "task_cluster": "睡眠规划",
+      "user_goal": "睡前或午休进入助眠歌单入口、设置闹钟并开启睡眠模式，不做自动推荐。",
+      "typical_users": [
+        "上班族",
+        "学生"
+      ],
+      "typical_states": [
+        "睡前",
+        "午休",
+        "起床时"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "frequent",
+      "physical_constraint": 0,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "蓝牙耳机当前是否有蓝牙耳机处于连接",
+        "耳机的设备名称",
+        "右耳机的当前电量百分比"
+      ],
+      "candidate_actions": [
+        "跳转到每日30首和收藏页面",
+        "跳转闹钟",
+        "模式切换（免打扰、睡眠、学习）"
+      ]
+    },
+    {
+      "scene_id": "spot_shooting_return",
+      "scene_name": "到点拍摄与返程",
+      "primary_category": "内容、娱乐与创作",
+      "task_cluster": "拍摄创作",
+      "user_goal": "到达摄影点、徒步拍摄、停车后展示当前位置，提供相机入口及返程导航。",
+      "typical_users": [
+        "摄影爱好者",
+        "徒步者"
+      ],
+      "typical_states": [
+        "到达摄影点",
+        "徒步拍摄",
+        "停车后"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "multi_step_shortcut",
+      "frequency": "occasional",
+      "physical_constraint": 2,
+      "psychological_safety": 1,
+      "mechanical_click_friction": 2,
+      "candidate_data": [
+        "位置经纬度",
+        "日程地址"
+      ],
+      "candidate_actions": [
+        "跳转到相机界面",
+        "跳转去导航"
+      ]
+    },
+    {
+      "scene_id": "weather_location_shooting_decision",
+      "scene_name": "天气地点拍摄决策",
+      "primary_category": "内容、娱乐与创作",
+      "task_cluster": "拍摄创作",
+      "user_goal": "旅行途中、雾霾或光线变化时将当前位置和天气放在一起，帮助判断是否值得下车拍摄。",
+      "typical_users": [
+        "摄影爱好者",
+        "旅行者"
+      ],
+      "typical_states": [
+        "旅行途中",
+        "雾霾",
+        "光线变化"
+      ],
+      "card_fit": "strong_candidate",
+      "value_type": "high_frequency_glance",
+      "frequency": "occasional",
+      "physical_constraint": 1,
+      "psychological_safety": 2,
+      "mechanical_click_friction": 1,
+      "candidate_data": [
+        "位置经纬度",
+        "城市名",
+        "当前温度",
+        "天气现象",
+        "体感温度"
+      ],
+      "candidate_actions": [
+        "查询天气状况"
+      ]
+    }
+  ]
+}

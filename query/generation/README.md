@@ -15,7 +15,7 @@
 
 ## 2. 输入与字段
 
-生成流程使用的是 `query_agent`，不是另起一套规则。其中 `query_agent/query_production_v2/SPEC.md` 和 `quality_rules.json` 规定 Query 的生产与质量要求，`query_agent/catalogs/` 提供能力边界：
+生成流程使用的是 `query_agent`，不是另起一套规则。其中 `SPEC.md` 和 `quality_rules.json` 规定 Query 的生产与质量要求，`catalogs/` 提供能力边界：
 
 - `draft/scenes.draft.json`：允许的场景、候选动作和候选数据。
 - `actions.json`：动作名称及应用归属。
@@ -81,7 +81,7 @@ x + y = 1000
 
 ## 5. 自然语言是怎样写的
 
-自然语言内容依据 `query_agent/query_production_v2/` 的生产规范、质量规则以及场景/动作/人设目录组织；执行工具只负责把这些约束落实成具体语句，不是规则来源。规则如下：
+自然语言内容依据 `` 的生产规范、质量规则以及场景/动作/人设目录组织；执行工具只负责把这些约束落实成具体语句，不是规则来源。规则如下：
 
 1. 必须明确要“卡片”或“小组件”。
 2. 先说真实处境或动机，再说想看什么、想做什么，不写成字段清单。
@@ -113,7 +113,7 @@ python .\validate_export.py
 如果目录被单独复制到别处，需要显式告诉脚本目录位置：
 
 ```powershell
-python .\validate_export.py --catalog-root <query_agent目录>
+python .\validate_export.py --catalog-root .\catalogs
 ```
 
 只有明确需要刷新报告时才写文件：

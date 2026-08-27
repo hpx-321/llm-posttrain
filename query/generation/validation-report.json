@@ -1,0 +1,108 @@
+{
+  "status": "fail",
+  "rows": {
+    "base": 68,
+    "added": 1000,
+    "total": 1068,
+    "added_shapes": {
+      "2": 988,
+      "3": 12
+    }
+  },
+  "atomic_category_counts": {
+    "base": {
+      "日历": 4,
+      "天气": 4,
+      "备忘录": 2,
+      "闹钟": 9,
+      "电话": 3,
+      "电池": 3,
+      "运动健康": 6,
+      "相机": 11,
+      "位置": 10,
+      "音乐": 9,
+      "导航": 13,
+      "系统设置": 2
+    },
+    "added": {
+      "闹钟": 165,
+      "音乐": 165,
+      "日历": 170,
+      "相机": 163,
+      "备忘录": 172,
+      "电话": 171,
+      "运动健康": 168,
+      "系统设置": 172,
+      "位置": 164,
+      "天气": 170,
+      "导航": 161,
+      "电池": 171
+    },
+    "final": {
+      "日历": 174,
+      "天气": 174,
+      "备忘录": 174,
+      "闹钟": 174,
+      "电话": 174,
+      "电池": 174,
+      "运动健康": 174,
+      "相机": 174,
+      "位置": 174,
+      "音乐": 174,
+      "导航": 174,
+      "系统设置": 174
+    }
+  },
+  "coverage": {
+    "personas": 30,
+    "scenes": 53
+  },
+  "quality": {
+    "duplicate_ids": 0,
+    "duplicate_queries": 0,
+    "near_duplicate_threshold": 0.92,
+    "near_duplicate_count": 0,
+    "largest_repeated_10_char_opening": 11,
+    "technical_hits": [],
+    "missing_card_intent": [],
+    "added_query_length": {
+      "min": 48,
+      "max": 99,
+      "average": 66.71
+    },
+    "exact_frozen_matches": []
+  },
+  "source_prefix_check": {
+    "rows": 60,
+    "exact_prefix_match": true
+  },
+  "catalog_check": {
+    "root": "catalogs",
+    "error_count": 246,
+    "examples": [
+      "N062: action outside scene spot_shooting_return: ['查询日程', '跳转日程']",
+      "N065: action outside scene sport_focus_mode: ['模式切换（免打扰、睡眠、学习）', '跳转锻炼时长页']",
+      "N069: action outside scene schedule_quick_contact: ['跳转日程']",
+      "N070: action outside scene focus_before_meeting: ['查询日程', '跳转日程']",
+      "N073: action outside scene schedule_weather_prep: ['跳转日程']",
+      "N074: action outside scene schedule_location_navigation: ['跳转日程']",
+      "N084: action outside scene schedule_location_navigation: ['跳转日程']",
+      "N090: action outside scene low_battery_trip_guard: ['跳转到电池设置页面']",
+      "N091: action outside scene low_battery_trip_guard: ['跳转到电池设置页面']",
+      "N092: action outside scene spot_shooting_return: ['查询日程', '跳转日程']",
+      "N094: action outside scene memo_timed_reminder: ['跳具体的tab页（跳转世界时钟、秒表、计时器）']",
+      "N102: action outside scene low_battery_trip_guard: ['跳转到电池设置页面']",
+      "N103: action outside scene focus_before_meeting: ['查询日程', '跳转日程']",
+      "N106: action outside scene sport_focus_mode: ['模式切换（免打扰、睡眠、学习）', '跳转锻炼时长页']",
+      "N113: action outside scene arrival_contact_navigation: ['查询日程', '跳转日程']",
+      "N116: action outside scene focus_before_meeting: ['查询日程', '跳转日程']",
+      "N118: action outside scene schedule_weather_prep: ['跳转日程']",
+      "N121: action outside scene pet_fed_tracker: ['跳具体的tab页（跳转世界时钟、秒表、计时器）']",
+      "N130: action outside scene low_battery_trip_guard: ['跳转到电池设置页面']",
+      "N134: action outside scene bad_weather_reschedule: ['跳转日程']"
+    ]
+  },
+  "errors": [
+    "246 rows fail strict scene/action/persona or frozen-query checks; see catalog_check.examples"
+  ]
+}

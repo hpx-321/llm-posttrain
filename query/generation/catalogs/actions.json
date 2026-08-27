@@ -1,0 +1,105 @@
+{
+  "catalog_id": "actions",
+  "version": "7.0",
+  "review_status": "user-confirmed-supported",
+  "source": "7.0动作和数据.md",
+  "phase_policy": {
+    "当前支持": "7.0文件中登记的一期和二期动作均为当前支持动作。",
+    "阶段用途": "一期和二期用于版本阶段统计，不代表当前支持状态。",
+    "未标注阶段": "7.0原文未标注阶段的音乐动作暂归一期，后续可在新版本中调整。",
+    "废弃": "未登记在7.0文件中的旧动作不再用于Query生产和覆盖率统计。"
+  },
+  "applications": [
+    {
+      "application_id": "health",
+      "application_name": "运动健康",
+      "actions": ["跳转运动健康首页", "跳转睡眠页", "跳转锻炼时长页"]
+    },
+    {
+      "application_id": "camera",
+      "application_name": "相机",
+      "actions": ["跳转到相机界面"],
+      "notes": "CLS设备只能跳到录像模式"
+    },
+    {
+      "application_id": "location",
+      "application_name": "位置",
+      "actions": []
+    },
+    {
+      "application_id": "music",
+      "application_name": "音乐",
+      "actions": ["跳转音乐首页", "跳转到每日30首和收藏页面"]
+    },
+    {
+      "application_id": "navigation",
+      "application_name": "导航",
+      "actions": ["跳转去导航"],
+      "notes": "支持常住地目的地：家、公司"
+    },
+    {
+      "application_id": "system_settings",
+      "application_name": "系统设置",
+      "actions": [
+        "跳到设置健康使用设备页面",
+        "一键开启省电模式",
+        "模式切换（免打扰、睡眠、学习）",
+        "开启省电模式开关",
+        "开启专注免打扰开关",
+        "开启深色模式开关",
+        "切换WiFi开关",
+        "切换移动数据开关"
+      ]
+    },
+    {
+      "application_id": "battery",
+      "application_name": "电池",
+      "actions": ["跳转到电池设置页面"]
+    },
+    {
+      "application_id": "phone",
+      "application_name": "电话",
+      "actions": ["拨打电话", "跳转到电话主页"]
+    },
+    {
+      "application_id": "alarm",
+      "application_name": "闹钟",
+      "actions": ["跳转闹钟", "跳具体的tab页（跳转世界时钟、秒表、计时器）"]
+    },
+    {
+      "application_id": "memo",
+      "application_name": "备忘录",
+      "actions": ["跳转到备忘录"]
+    },
+    {
+      "application_id": "weather",
+      "application_name": "天气",
+      "actions": ["查询天气状况", "跳转某个城市"]
+    },
+    {
+      "application_id": "calendar",
+      "application_name": "日历",
+      "actions": ["查询日程", "跳转日程", "welink一键入会"]
+    }
+  ],
+  "phase_1_actions": [
+    {"application_id": "music", "actions": ["跳转音乐首页", "跳转到每日30首和收藏页面"]},
+    {"application_id": "system_settings", "actions": ["跳到设置健康使用设备页面", "一键开启省电模式"]},
+    {"application_id": "battery", "actions": ["跳转到电池设置页面"]},
+    {"application_id": "phone", "actions": ["拨打电话"]},
+    {"application_id": "weather", "actions": ["查询天气状况", "跳转某个城市"]},
+    {"application_id": "calendar", "actions": ["查询日程", "跳转日程", "welink一键入会"]}
+  ],
+  "phase_2_actions": [
+    {"application_id": "health", "actions": ["跳转运动健康首页", "跳转睡眠页", "跳转锻炼时长页"]},
+    {"application_id": "camera", "actions": ["跳转到相机界面"]},
+    {"application_id": "navigation", "actions": ["跳转去导航"]},
+    {"application_id": "system_settings", "actions": ["模式切换（免打扰、睡眠、学习）", "开启省电模式开关", "开启专注免打扰开关", "开启深色模式开关", "切换WiFi开关", "切换移动数据开关"]},
+    {"application_id": "phone", "actions": ["跳转电话主页"]},
+    {"application_id": "alarm", "actions": ["跳转闹钟", "跳具体的tab页（跳转世界时钟、秒表、计时器）"]},
+    {"application_id": "memo", "actions": ["跳转到备忘录"]}
+  ],
+  "deprecated_actions": [
+    {"note": "旧版本清单中未登记在7.0文件中的动作全部废弃。"}
+  ]
+}
