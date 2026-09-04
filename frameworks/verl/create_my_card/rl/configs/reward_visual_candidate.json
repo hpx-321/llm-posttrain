@@ -1,0 +1,37 @@
+{
+  "schema_version": "create-my-card.reward-audit.v1",
+  "status": "visual_candidate_unvalidated",
+  "weights": {
+    "contract": 0.10,
+    "content": 0.20,
+    "static_layout": 0.45,
+    "style": 0.20,
+    "efficiency": 0.05
+  },
+  "severity_penalties": {
+    "P0": 1.0,
+    "P1": 0.25,
+    "P2": 0.05
+  },
+  "rule_families": {
+    "contract": ["PROTOCOL.", "STRUCT.", "CATALOG.", "ASSET."],
+    "static_layout": ["SPACING.", "SLOT.", "DENSITY.", "AREA.", "LAYOUT2X4."],
+    "style": ["COLOR.", "GRADIENT.", "TYPE.", "SHAPE.", "ICON.", "COPY.", "SCENE.", "VISUAL."]
+  },
+  "l2_rule_families": ["GEOMETRY.", "RECONCILE."],
+  "l2_layout_blend": 0.75,
+  "l2_critical_rule_ids": [
+    "GEOMETRY.OVERLAP",
+    "GEOMETRY.AREA_CONTENT_TEXT_OVERLAP",
+    "GEOMETRY.SAFE_AREA_OVERFLOW",
+    "GEOMETRY.TEXT_SQUASH",
+    "GEOMETRY.AREA_BOTTOM_ANCHOR"
+  ],
+  "penalized_evidence_types": ["程序已证实"],
+  "efficiency": {
+    "completion_tokens_soft_max": 1400,
+    "completion_tokens_hard_max": 1536
+  },
+  "calibrated_components": ["contract"],
+  "policy_update_enabled": false
+}

@@ -1,0 +1,311 @@
+[
+  {
+    "id": "cmc-v16-q001",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": [
+      "/data/weather/current/temperatureText",
+      "/data/weather/current/condition"
+    ],
+    "required_primary_texts": ["上海"],
+    "required_events": [
+      {
+        "call": "clickToDeeplink",
+        "args": {
+          "intentName": "Weather_CityCode",
+          "bundleName": "",
+          "abilityName": "",
+          "uri": "hww://www.huawei.com/totemweather?enterType=share&cityCode="
+        }
+      }
+    ],
+    "reference_content_budget": {"facts_min": 2, "facts_max": 2},
+    "review_notes": "天气：当前温度、天气状况和正确的天气入口。"
+  },
+  {
+    "id": "cmc-v16-q013",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": [
+      "/data/calendar/events/0/title",
+      "/data/calendar/events/0/dtStart"
+    ],
+    "required_events": [
+      {
+        "call": "clickToIntent",
+        "args": {
+          "intentName": "ViewCalendarEvent",
+          "params": {"entityId": {"path": "/data/calendar/events/0/entityId"}}
+        }
+      }
+    ],
+    "reference_content_budget": {"facts_min": 2, "facts_max": 2},
+    "review_notes": "日程：下一场会议标题、开始时间和对应详情入口。"
+  },
+  {
+    "id": "cmc-v16-q025",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": ["/data/countdown/countdownDays"],
+    "required_primary_texts": ["国庆倒计时"],
+    "reference_content_budget": {"facts_min": 1, "facts_max": 1},
+    "review_notes": "倒数日：剩余天数和用户指定标题。"
+  },
+  {
+    "id": "cmc-v16-q035",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": [
+      "/data/deviceUsage/currentDay/totalUsageDurationText"
+    ],
+    "reference_content_budget": {"facts_min": 1, "facts_max": 2},
+    "review_notes": "设备使用：突出今天累计使用时长，亮屏时长可作辅助。"
+  },
+  {
+    "id": "cmc-v16-q043",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": [
+      "/data/earphone/isConnected",
+      "/data/earphone/earphoneName"
+    ],
+    "required_events": [
+      {
+        "call": "clickToDeeplink",
+        "args": {
+          "intentName": "Settings",
+          "bundleName": "com.huawei.hmos.settings",
+          "abilityName": "com.huawei.hmos.settings.MainAbility",
+          "uri": "bluetooth_entry"
+        }
+      }
+    ],
+    "reference_content_budget": {"facts_min": 2, "facts_max": 3},
+    "review_notes": "耳机：连接状态、设备名称和蓝牙设置入口。"
+  },
+  {
+    "id": "cmc-v16-q053",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": [
+      "/data/phoneBattery/batterySOCText",
+      "/data/phoneBattery/chargingStatusDesc"
+    ],
+    "required_events": [
+      {
+        "call": "clickToDeeplink",
+        "args": {
+          "intentName": "Settings",
+          "bundleName": "com.huawei.hmos.settings",
+          "abilityName": "com.huawei.hmos.settings.MainAbility",
+          "uri": "battery"
+        }
+      }
+    ],
+    "reference_content_budget": {"facts_min": 2, "facts_max": 3},
+    "review_notes": "手机电池：电量、充电状态和电池设置入口。"
+  },
+  {
+    "id": "cmc-v16-q067",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": ["/data/sleep/sleepScore"],
+    "required_events": [
+      {
+        "call": "clickToDeeplink",
+        "args": {
+          "intentName": "Health",
+          "bundleName": "",
+          "abilityName": "",
+          "uri": "huaweischeme://healthapp/router/sleepDetail"
+        }
+      }
+    ],
+    "reference_content_budget": {"facts_min": 1, "facts_max": 2},
+    "review_notes": "睡眠：昨晚得分和睡眠详情入口。"
+  },
+  {
+    "id": "cmc-v16-q081",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": [
+      "/data/musicPlayback/currentTrack/title",
+      "/data/musicPlayback/currentTrack/artist"
+    ],
+    "reference_content_budget": {"facts_min": 2, "facts_max": 2},
+    "review_notes": "音乐：当前歌曲和歌手；TaskSpec 明确不要求操作按钮。"
+  },
+  {
+    "id": "cmc-v16-q097",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": [
+      "/data/connectedDevice/isConnected",
+      "/data/connectedDevice/deviceName"
+    ],
+    "required_events": [
+      {
+        "call": "clickToDeeplink",
+        "args": {
+          "intentName": "Settings",
+          "bundleName": "com.huawei.hmos.settings",
+          "abilityName": "com.huawei.hmos.settings.MainAbility",
+          "uri": "bluetooth_entry"
+        }
+      }
+    ],
+    "reference_content_budget": {"facts_min": 2, "facts_max": 3},
+    "review_notes": "连接设备：连接状态、设备名称和蓝牙设置入口。"
+  },
+  {
+    "id": "card84-v18-q004",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": ["/data/healthSport/dailySteps"],
+    "reference_content_budget": {"facts_min": 1, "facts_max": 3},
+    "review_notes": "健康运动：今日步数是唯一强制主信息，完成度和状态可辅助。"
+  },
+  {
+    "id": "card84-v18-q009",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": ["/data/todo/incompleteCount"],
+    "reference_content_budget": {"facts_min": 1, "facts_max": 2},
+    "review_notes": "待办：今天未完成数量，状态文本可辅助。"
+  },
+  {
+    "id": "card84-v18-q015",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": ["/data/settings/focusModeStatusText"],
+    "required_events": [
+      {
+        "call": "clickToDeeplink",
+        "args": {
+          "intentName": "Settings",
+          "bundleName": "com.huawei.hmos.settings",
+          "abilityName": "com.huawei.hmos.settings.MainAbility",
+          "uri": "intelligent_scene_entry"
+        }
+      }
+    ],
+    "reference_content_budget": {"facts_min": 1, "facts_max": 2},
+    "review_notes": "设置：专注模式状态和可操作的设置入口；TaskSpec 未提供直接切换事件。"
+  },
+  {
+    "id": "card84-v18-q030",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": ["/data/location/currentAddressText"],
+    "reference_content_budget": {"facts_min": 1, "facts_max": 2},
+    "review_notes": "位置：当前地址是主信息，行政区可辅助。"
+  },
+  {
+    "id": "handwritten-v41-q536",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": [
+      "/data/callLog/callStatusText",
+      "/data/callLog/missedCallCount"
+    ],
+    "required_events": [
+      {
+        "call": "clickToDeeplink",
+        "args": {
+          "intentName": "Calllog_Detail",
+          "bundleName": "com.example.future.calllog",
+          "abilityName": "DetailAbility",
+          "uri": "calllog://callloggrouped/detail"
+        }
+      }
+    ],
+    "reference_content_budget": {"facts_min": 2, "facts_max": 3},
+    "review_notes": "通话记录：状态、未接数量和分组详情入口；TaskSpec 没有联系人姓名字段。"
+  },
+  {
+    "id": "handwritten-v41-q586",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": [
+      "/data/alarm/dateText",
+      "/data/alarm/dateText2",
+      "/data/alarm/dateText3",
+      "/data/alarm/dateText4",
+      "/data/alarm/dateText5",
+      "/data/alarm/dateText6",
+      "/data/alarm/dateText7"
+    ],
+    "reference_content_budget": {"facts_min": 7, "facts_max": 8},
+    "review_notes": "闹钟：七天重复周期必须完整，闹钟状态可作第八项辅助信息。"
+  },
+  {
+    "id": "handwritten-v41-q601",
+    "reviewed": true,
+    "reviewer_type": "llm",
+    "review_method": "diverse_canary_review_with_taskspec_and_gold_crosscheck",
+    "prompt_version": "content-label-v1",
+    "verification_status": "passed",
+    "required_primary_paths": [
+      "/data/camera/activeModeText",
+      "/data/camera/activeModeText2"
+    ],
+    "required_events": [
+      {
+        "call": "clickToDeeplink",
+        "args": {
+          "intentName": "Camera_Detail",
+          "bundleName": "com.example.future.camera",
+          "abilityName": "DetailAbility",
+          "uri": "camera://camerapromode/detail"
+        }
+      }
+    ],
+    "reference_content_budget": {"facts_min": 2, "facts_max": 2},
+    "review_notes": "相机：专业模式及关键参数摘要，并提供专业模式入口。"
+  }
+]

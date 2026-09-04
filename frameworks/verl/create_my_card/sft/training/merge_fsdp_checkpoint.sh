@@ -1,15 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ "${PIPELINE_EXECUTION_MODE:-}" == "smoke" ]]; then
+  echo "Smoke run: skipped FSDP checkpoint merge."
+  exit 0
+fi
+
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 PROJECT_ROOT=$(cd -- "${SCRIPT_DIR}/../../../../.." && pwd)
 
 SAVE_PATH=${SAVE_PATH:-/mnt/model/qwen36-27b-create-my-card-sft-v1}
 CHECKPOINT_STEP=${CHECKPOINT_STEP:-best}
 MERGED_MODEL=${MERGED_MODEL:-}
+PYTHON_BIN=${PYTHON_BIN:-python3}
 
 case "${CHECKPOINT_STEP}" in
   best) tracker="${SAVE_PATH}/best_checkpointed_iteration.txt" ;;
+  latest) tracker="${SAVE_PATH}/latest_checkpointed_iteration.txt" ;;
   *) tracker= ;;
 esac
 if [[ -n "${tracker}" ]]; then
@@ -23,7 +30,7 @@ else
 fi
 
 if ! [[ "${step}" =~ ^[1-9][0-9]*$ ]]; then
-  echo "Error: CHECKPOINT_STEP must be best or a positive integer, got: ${step}" >&2
+  echo "Error: CHECKPOINT_STEP must be best, latest, or a positive integer, got: ${step}" >&2
   exit 1
 fi
 
@@ -52,14 +59,14 @@ echo "  started: $(date '+%Y-%m-%d %H:%M:%S %z')"
 echo "Loading and rebuilding 27B shards on CPU can remain quiet for tens of minutes."
 
 cd "${PROJECT_ROOT}"
-python3 -m verl.model_merger merge \
+"${PYTHON_BIN}" -m verl.model_merger merge \
   --backend fsdp \
   --local_dir "${ckpt_dir}" \
   --target_dir "${MERGED_MODEL}" \
   --trust-remote-code \
   --use_cpu_initialization
 
-python3 "${SCRIPT_DIR}/validate_merged_model.py" \
+"${PYTHON_BIN}" "${SCRIPT_DIR}/validate_merged_model.py" \
   --model-path "${MERGED_MODEL}"
 
 echo "Merge completed at $(date '+%Y-%m-%d %H:%M:%S %z')"

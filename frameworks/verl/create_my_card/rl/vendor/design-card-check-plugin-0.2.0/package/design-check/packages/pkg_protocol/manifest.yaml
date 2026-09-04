@@ -1,0 +1,19 @@
+# pkg-protocol 包清单（manifest 是包身份真值；解析失败显式报错，不静默降级）
+id: pkg-protocol
+version: 0.1.0
+description: 宿主管线协议契约（PROTOCOL.* / STRUCT.*）——更新节奏跟随宿主管线，与设计规范无关
+truth_source:
+  - 宿主 CreateMyCard 仓库 scripts/preview 管线常量（只读引用，无指纹字段，管线升级时人工核对）
+rules:
+  - PROTOCOL.MESSAGE_COUNT
+  - PROTOCOL.VERSION
+  - PROTOCOL.CATALOG_ID
+  - PROTOCOL.DANGLING_CHILD
+  - STRUCT.SIZE_MISMATCH
+  - STRUCT.ROOT_CONTAINER
+  - STRUCT.IDS_UNIQUE
+applicability:
+  card_size: [2x2, 2x4]
+  inputs: [dsl]
+registry: rules            # 规则注册进 validators.rules._RULES（一致性断言口径）
+depends: [check-core]

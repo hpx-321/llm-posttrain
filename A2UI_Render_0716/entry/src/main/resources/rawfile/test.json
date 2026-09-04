@@ -1,0 +1,10 @@
+[
+  {"version":"v0.9","createSurface":{"surfaceId":"sleep","catalogId":"ohos.a2ui.extended.catalog.form"}},
+  {"version":"v0.9","updateComponents":{"surfaceId":"sleep","components":[
+    {"id":"root","component":"Column","children":["title","duration","range"],"itemMargin":8,"styles":{"width":"160","height":"160","padding":12,"backgroundColor":"#FF4C1D95"}},
+    {"id":"title","component":"Text","content":"昨晚睡眠","styles":{"fontSize":14,"fontWeight":700,"fontColor":"#FFFFFFFF","maxLines":1}},
+    {"id":"duration","component":"Text","content":"{{ $__dataModel.duration }}","styles":{"fontSize":38,"fontWeight":700,"fontColor":"#FFFFFFFF","maxLines":1}},
+    {"id":"range","component":"Text","content":"{{ $__dataModel.range }}","styles":{"fontSize":12,"fontColor":"#FFE9D5FF","maxLines":1}}
+  ]}},
+  {"version":"v0.9","updateDataModel":{"surfaceId":"sleep","path":"/","value":{"duration":"7小时28分","range":"23:36 - 07:04"}}}
+]

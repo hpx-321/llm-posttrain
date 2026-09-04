@@ -184,6 +184,7 @@ _STRING_PROPERTIES = frozenset(
 _FORBIDDEN_PROPERTIES = frozenset({"action", "event", "submit_form"})
 _FORBIDDEN_STRING_FRAGMENTS = ("{{", "$item", "$__dataModel")
 _EXPRESSION_PATH_RE = re.compile(r"\$\{(/[^{}]+)\}")
+_LEGACY_EVENT_PATH_RE = re.compile(r"^\s*\{\{\s*\$\{(/[^{}\s]+)\}\s*\}\}\s*$")
 _EXPRESSION_OPERATORS = (
     "===",
     "!==",
@@ -2736,7 +2737,8 @@ def _schema_child(current: Any, token: str) -> Any | None:
     if isinstance(current, list):
         if not token.isdigit() or not current:
             return None
-        return current[0]
+        index = int(token)
+        return current[index] if index < len(current) else None
     if not isinstance(current, dict):
         return None
     if current.get("type") == "array":
@@ -2933,7 +2935,23 @@ def _candidate_event_handler(candidate: dict[str, Any]) -> dict[str, Any] | None
         args = action.get("args")
     if not isinstance(call, str) or not isinstance(args, dict):
         return None
-    return {"call": call, "args": copy.deepcopy(args)}
+    return {"call": call, "args": normalize_task_event_value(args)}
+
+
+def normalize_task_event_value(value: Any) -> Any:
+    """Normalize legacy TaskSpec template paths to Compact DSL path bindings."""
+
+    if isinstance(value, str):
+        matched = _LEGACY_EVENT_PATH_RE.fullmatch(value)
+        return {"path": matched.group(1)} if matched is not None else value
+    if isinstance(value, dict):
+        return {
+            key: normalize_task_event_value(child)
+            for key, child in value.items()
+        }
+    if isinstance(value, list):
+        return [normalize_task_event_value(child) for child in value]
+    return copy.deepcopy(value)
 
 
 def _stable_json(value: Any) -> str:

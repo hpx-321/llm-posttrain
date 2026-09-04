@@ -73,6 +73,7 @@ python frameworks/verl/create_my_card/data_pipeline/converters/reverse_and_verif
 
 ## 相关规范
 
+- [正逆向转换器实现逻辑](../../../../../docs/create_my_card/converter-implementation-logic.md)
 - [数据生产交接说明](../../../../../docs/create_my_card/data-production-handoff.md)
 - [数据质检规范](../../../../../docs/create_my_card/data-quality-spec.md)
 - [Expression Profile v1](../../../../../docs/create_my_card/expression-profile-v1.md)

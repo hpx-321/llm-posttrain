@@ -1,0 +1,34 @@
+# pkg-l2-visual 包清单（manifest 是包身份真值；解析失败显式报错，不静默降级）
+id: pkg-l2-visual
+version: 0.1.0
+description: L2 视觉对账（L2a 几何实测 / L2b 声明↔实测对账；重叠/裁切/基线三条 2026-08-24 裁决移交同事侧）
+truth_source:
+  - dump 实测真值（review/dumps/*.layout.json，采样时间记 manifest）
+requires_external:              # 运行依赖声明（无设备时 --dry-run / 纯 DSL 降级）
+  - 外层 CreateMyCard 仓库预览/渲染管线（PIPELINE_DIR，默认回退外层仓库根）
+  - 本地模拟器/设备（L2b 渲染回读）
+rules:
+  - GEOMETRY.SAFE_AREA_OVERFLOW
+  - GEOMETRY.OVERLAP            # 移交同事侧（代码暂留、默认不输出，见 delegated_rules）
+  - GEOMETRY.BUTTON_SIZE
+  - GEOMETRY.SLOT_GAP
+  - GEOMETRY.LABEL_GAP
+  - GEOMETRY.CONTENT_ALIGN_ANCHOR
+  - GEOMETRY.BASELINE_MISMATCH  # 移交同事侧（同上）
+  - GEOMETRY.AREA_TITLE_ALIGN
+  - GEOMETRY.AREA_CONTENT_TEXT_OVERLAP  # 移交同事侧（同上）
+  - GEOMETRY.AREA_BOTTOM_ANCHOR
+  - GEOMETRY.AREA_TITLE_ICON_ANCHOR
+  - GEOMETRY.TEXT_SQUASH
+  - RECONCILE.COLOR_DRIFT
+  - RECONCILE.OPACITY_DRIFT
+  - RECONCILE.DIMENSION_DRIFT
+delegated_rules:                # 2026-08-24 裁决移交同事侧（代码暂留、默认不输出；--include-delegated 恢复；代码侧真值 = geometry.DELEGATED_RULES，一致性由单测守护）
+  - GEOMETRY.OVERLAP
+  - GEOMETRY.BASELINE_MISMATCH
+  - GEOMETRY.AREA_CONTENT_TEXT_OVERLAP
+applicability:
+  card_size: [2x2, 2x4]
+  inputs: [dsl, dump]
+registry: static                # 不进 _RULES 注册表；一致性断言对照 rule_category 静态列表
+depends: [check-core]

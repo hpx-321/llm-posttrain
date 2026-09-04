@@ -1,0 +1,20 @@
+# pkg-skeleton 包清单（manifest 是包身份真值；解析失败显式报错，不静默降级）
+# 2×2 骨架契约立项（docs/plan-layout-2x2-skeleton.md）落地后 card_size 追加 2x2、
+# rules 追加对应 LAYOUT2X2.*——双尺寸结构本 manifest 已预留。
+id: pkg-skeleton
+version: 0.1.0
+description: 布局骨架契约（当前 2×4 几何契约组；2×2 骨架立项后同归本包）
+truth_source:
+  - DESIGN-2x4.md front-matter layout_slots + 补充骨架表
+rules:
+  - LAYOUT2X4.ROOT_CONTRACT      # 2026-08-24 owner 裁决：语法层契约移出检出，函数静默保留
+  - LAYOUT2X4.ROOT_STRUCTURE
+  - LAYOUT2X4.VARIANT_MATCH
+  - LAYOUT2X4.EQUAL_SPLIT
+  - LAYOUT2X4.CLOSURE
+  - LAYOUT2X4.TEMPLATE_DELTA
+applicability:
+  card_size: [2x4]               # 声明口径；实际门禁仍由 layout_2x4._slots 的 card_size 检查兜底
+  inputs: [dsl]
+registry: rules
+depends: [check-core]

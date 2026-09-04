@@ -1,0 +1,100 @@
+{
+  "schema_version": "create-my-card.rl-pipeline.v1",
+  "task": "taskspec_to_dsl",
+  "run": {
+    "execution_mode": "scaffold",
+    "output_root": "{repo_root}/outputs/rl-pipeline",
+    "base_checkpoint": "/mnt/model/qwen36-27b-create-my-card-sft-v1-merged"
+  },
+  "stages": [
+    {
+      "name": "rft",
+      "enabled": true,
+      "backend": "command",
+      "dataset_dir": "{run_dir}/datasets/rft",
+      "dataset_files": ["train.parquet", "validation.parquet"],
+      "output_checkpoint": "{stage_dir}/merged-checkpoint",
+      "commands": [
+        {
+          "name": "train-rft",
+          "argv": ["bash", "{repo_root}/frameworks/verl/create_my_card/sft/training/run_sft.sh"],
+          "cwd": "{repo_root}",
+          "env": {
+            "MODEL_PATH": "{input_checkpoint}",
+            "DATA_DIR": "{dataset_dir}",
+            "SAVE_PATH": "{stage_dir}/fsdp-checkpoint",
+            "PIPELINE_EXECUTION_MODE": "{execution_mode}",
+            "OOM_PROBE_FILE": "{dataset_dir}/oom_probe.parquet",
+            "DRY_RUN_STEPS": "2",
+            "TOTAL_EPOCHS": "1",
+            "LEARNING_RATE": "1e-6",
+            "PROJECT_NAME": "create-my-card-rft",
+            "EXPERIMENT_NAME": "taskspec-to-dsl-rft"
+          }
+        },
+        {
+          "name": "merge-rft",
+          "argv": ["bash", "{repo_root}/frameworks/verl/create_my_card/sft/training/merge_fsdp_checkpoint.sh"],
+          "cwd": "{repo_root}",
+          "env": {
+            "SAVE_PATH": "{stage_dir}/fsdp-checkpoint",
+            "MERGED_MODEL": "{output_checkpoint}",
+            "CHECKPOINT_STEP": "best",
+            "PIPELINE_EXECUTION_MODE": "{execution_mode}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "dpo",
+      "enabled": true,
+      "backend": "command",
+      "dataset_dir": "{run_dir}/datasets/dpo",
+      "dataset_files": ["train.jsonl", "validation.jsonl"],
+      "output_checkpoint": "{stage_dir}/checkpoint",
+      "commands": [
+        {
+          "name": "train-dpo",
+          "argv": ["bash", "{repo_root}/frameworks/verl/create_my_card/rl/training/run_dpo_backend.sh"],
+          "cwd": "{repo_root}",
+          "env": {
+            "MODEL_PATH": "{input_checkpoint}",
+            "TOKENIZER_PATH": "{input_checkpoint}",
+            "TRAIN_FILE": "{dataset_dir}/train.jsonl",
+            "VALIDATION_FILE": "{dataset_dir}/validation.jsonl",
+            "SAVE_PATH": "{output_checkpoint}",
+            "PIPELINE_EXECUTION_MODE": "{execution_mode}",
+            "DPO_MAX_LENGTH": "5632",
+            "DPO_MAX_PROMPT_LENGTH": "4096",
+            "DPO_LEARNING_RATE": "5e-7",
+            "DPO_NUM_TRAIN_EPOCHS": "1",
+            "DPO_BETA": "0.1",
+            "DPO_FSDP_SAVE_PATH": "{stage_dir}/fsdp-checkpoint"
+          }
+        }
+      ]
+    },
+    {
+      "name": "grpo",
+      "enabled": true,
+      "backend": "command",
+      "dataset_dir": "{run_dir}/datasets/grpo",
+      "dataset_files": ["train.parquet", "validation.parquet"],
+      "output_checkpoint": "{stage_dir}/checkpoint",
+      "commands": [
+        {
+          "name": "train-grpo",
+          "argv": ["bash", "{repo_root}/frameworks/verl/create_my_card/rl/training/run_grpo.sh"],
+          "cwd": "{repo_root}",
+          "env": {
+            "MODEL_PATH": "{input_checkpoint}",
+            "DATA_DIR": "{dataset_dir}",
+            "SAVE_PATH": "{output_checkpoint}",
+            "PIPELINE_EXECUTION_MODE": "{execution_mode}",
+            "TOKENIZER_PATH": "/mnt/model/Qwen3.6-27B"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+# pkg-spacing 包清单（manifest 是包身份真值；解析失败显式报错，不静默降级）
+id: pkg-spacing
+version: 0.1.0
+description: 间距合法性（安全边距 + 槽位间距 + 密度 + 分区）
+truth_source:
+  - DESIGN.md 间距/密度章
+rules:
+  - SPACING.SAFE_MARGIN
+  - SPACING.SCALE
+  - SLOT.MODEL_REQUIRED
+  - SLOT.ORDER
+  - SLOT.LEADING_ICON_COUNT
+  - DENSITY.EXPLICIT_ACTIONS
+  - DENSITY.SINGLE_PRIMARY_ACTION
+  - DENSITY.NUMBERS
+  - AREA.TITLE_TEXT_TIER
+applicability:
+  card_size: [2x2, 2x4]
+  inputs: [dsl]
+registry: rules
+depends: [check-core]

@@ -18,6 +18,10 @@
 - [业务总览与运行入口](../frameworks/verl/create_my_card/README.md)
 - [数据生产交接说明](create_my_card/data-production-handoff.md)
 - [数据质检规范](create_my_card/data-quality-spec.md)
+- [正逆向转换器实现逻辑](create_my_card/converter-implementation-logic.md)
+- [本地渲染服务接口与连通性测试](create_my_card/local-render-service.md)
+- [RL 布局质量优化方案](create_my_card/rl-layout-optimization-plan.md)
+- [Stage 0 奖励审计实现](../frameworks/verl/create_my_card/rl/README.md)
 - [Expression Profile v1](create_my_card/expression-profile-v1.md)
 
 CreateMyCard 的正逆向转换器、SFT 数据构建脚本和源数据属于可执行模块，放在 `frameworks/verl/create_my_card/`；本目录只维护跨批次稳定的数据合同与验收规范。

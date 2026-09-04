@@ -1,0 +1,18 @@
+{
+  "name": "design-card-check-plugin",
+  "version": "0.2.0",
+  "private": true,
+  "description": "CreateMyCard 奖励与 L2 采集使用的 design-card-check 0.2.0 最小离线运行快照",
+  "files": [
+    "package.json",
+    "DESIGN.md",
+    "DESIGN-2x4.md",
+    "design-check/packages/",
+    "design-check/validators/",
+    "design-check/scripts/check_card.py",
+    "design-check/scripts/contrast_calc.py",
+    "design-check/scripts/device_utils.py",
+    "design-check/scripts/render_dump.py",
+    "design-check/scripts/render_eval_dump.py"
+  ]
+}

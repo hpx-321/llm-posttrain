@@ -15,7 +15,13 @@ SAVE_PATH=${SAVE_PATH:-/mnt/model/qwen36-27b-create-my-card-sft-v1}
 OOM_PROBE_FILE=${OOM_PROBE_FILE:-${DATA_DIR}/oom_probe.parquet}
 TRAIN_DEVICE=${TRAIN_DEVICE:-npu}
 
-DRY_RUN=${DRY_RUN:-1}
+PIPELINE_EXECUTION_MODE=${PIPELINE_EXECUTION_MODE:-}
+case "${PIPELINE_EXECUTION_MODE}" in
+  smoke) DRY_RUN=1 ;;
+  train) DRY_RUN=0 ;;
+  "") DRY_RUN=${DRY_RUN:-1} ;;
+  *) echo "Error: PIPELINE_EXECUTION_MODE must be smoke or train" >&2; exit 1 ;;
+esac
 DRY_RUN_STEPS=${DRY_RUN_STEPS:-2}
 
 NPROC_PER_NODE=${NPROC_PER_NODE:-}

@@ -1,0 +1,45 @@
+# pkg-elements 包清单（manifest 是包身份真值；解析失败显式报错，不静默降级）
+id: pkg-elements
+version: 0.1.0
+description: 元素合法性（颜色/渐变/场景/对比度/图标/素材/组件目录/形状/字号/文案）
+truth_source:
+  - DESIGN.md（front-matter token 层）
+  - data/color_profile.json、data/media_icons.json（vendored 渲染工程清单，随包分发）
+rules:
+  - COLOR.ALPHA_STEP
+  - COLOR.TOKEN_UNREGISTERED
+  - COLOR.OPACITY_MISUSE
+  - COLOR.BUTTON_CONTEXT
+  - GRADIENT.MISSING_FALLBACK
+  - GRADIENT.UNREGISTERED
+  - GRADIENT.PRESET_MISMATCH
+  - SCENE.GRADIENT_EXACT
+  - SEMANTIC.SCENE_GRADIENT_MISMATCH   # L3 语义启发式（暂缓投入，注册保留）
+  - SEMANTIC.REDUNDANT_SIGNAL          # L3 语义启发式（同上）
+  - VISUAL.CONTRAST
+  - ICON.SIZE_CONTRACT
+  - ICON.MULTICOLOR_TINT
+  - ICON.DUPLICATE_SRC
+  - ICON.SRC_NOT_IN_MEDIA
+  - ICON.SRC_EXTENSION_MISMATCH
+  - ASSET.EMOJI_ICON
+  - ASSET.REMOTE_SRC
+  - ASSET.UNDECLARED
+  - ASSET.HERO_ICON_CONTRACT
+  - CATALOG.COMPONENT_UNREGISTERED
+  - CATALOG.STYLE_KEY_UNREGISTERED
+  - SHAPE.CARD_ROOT_RADIUS
+  - SHAPE.BUTTON_RADIUS
+  - SHAPE.RADIUS_FAMILY
+  - SHAPE.NESTED_RADIUS
+  - TYPE.FONT_SIZE_STEP
+  - TYPE.VALUE_GROUP_TIER
+  - TYPE.BUTTON_TYPOGRAPHY
+  - TYPE.WEIGHT_MATRIX
+  - COPY.TITLE_MAX_CHARS
+  - COPY.ACTION_LABEL_MAX_CHARS
+applicability:
+  card_size: [2x2, 2x4]
+  inputs: [dsl]
+registry: rules
+depends: [check-core]
