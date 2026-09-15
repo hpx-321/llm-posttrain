@@ -27,6 +27,15 @@ python frameworks/verl/create_my_card/data_pipeline/converters/reverse_and_verif
   --report-out case/report.json
 ```
 
+```cmd
+python frameworks/verl/create_my_card/data_pipeline/converters/reverse_and_verify.py ^
+  --source-a2ui case/card.genui.jsonl ^
+  --task-spec case/task-spec.json ^
+  --compact-out case/design-compact.card.genui.jsonl ^
+  --roundtrip-out case/roundtrip.card.genui.jsonl ^
+  --report-out case/report.json
+```
+
 TaskSpec 没有内嵌 CardSpec 时，它仍可提供尺寸，但不会执行完整的 TaskSpec + CardSpec 能力上下文校验。完整参数和退出码见[转换器说明](converters/README.md)。
 
 ## 冻结合同
