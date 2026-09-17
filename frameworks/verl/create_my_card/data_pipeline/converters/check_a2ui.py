@@ -1,5 +1,7 @@
+from .common import ParsedA2ui
+
 def _normalize_a2ui_input(a2ui: str | list[dict],) -> list[str]:
-    """统一输入格式"""
+    """统一输入格式,允许输入example 目录下两种数据格式"""
 
     if isinstance(a2ui, str):
         return a2ui.splitlines()
@@ -69,13 +71,14 @@ def _check_outer_messages(a2ui:list[str] | None) -> tuple[dict[str, dict[str, An
 
 
 def _validate_create_surface(value: Mapping[str, Any]) -> None:
-    """检查createSurface 字段 """
+    """检查createSurface 内部字段 """
     required = {"surfaceId", "catalogId"}
     allowed = {*required, "width", "height"}
     missing = required - set(value)
     unknown = set(value) - allowed
     has_width = "width" in value
     has_height = "height" in value
+
     if missing or unknown or has_width != has_height:
         details = []
         if missing:
@@ -98,7 +101,22 @@ def _validate_create_surface(value: Mapping[str, Any]) -> None:
         if not isinstance(size, int) or isinstance(size, bool) or size <= 0:
             raise A2uiReverseConversionError(f"createSurface.{name} must be positive integer.")
 
+def _require_exact_fields(
+    value: Mapping[str, Any], expected: set[str], context: str
+) -> None:
+    """根据expected 检查字段是否缺失"""
+    missing = expected - set(value)
+    unknown = set(value) - expected
+    if missing or unknown:
+        details = []
+        if missing:
+            details.append(f"missing {_names(missing)}")
+        if unknown:
+            details.append(f"unsupported {_names(unknown)}")
+        raise A2uiReverseConversionError(f"{context} fields are invalid: {'; '.join(details)}.")
+
 def _validate_update_data_model(data: Mapping[str, Any],) -> None:
+    """检查updateDataModel 内部字段"""
 
     _require_exact_fields(
         data,
@@ -116,9 +134,12 @@ def _validate_update_data_model(data: Mapping[str, Any],) -> None:
             "updateDataModel.value must be an object."
         )
 
+
 def _parse_components(value: Any) -> dict[str, dict[str, Any]]:
+    """检查 updateComponents 的components 字段内部"""
     if not isinstance(value, list) or not value:
         raise A2uiReverseConversionError("updateComponents.components must be non-empty array.")
+
     components: dict[str, dict[str, Any]] = {}
     for index, component in enumerate(value):
         context = f"component[{index}]"
@@ -137,13 +158,13 @@ def _parse_components(value: Any) -> dict[str, dict[str, Any]]:
             )
 
         allowed = {"id", "component", "children", "styles", "onClick"}
+
         allowed.update(forward._SEMANTIC_FIELDS.get(component_type, frozenset()))
         if component_type in {"Row", "Column"}:
             allowed.add("itemMargin")
         if component_type == "List":
             allowed.add("space")
 
-        # 这里对比的是当前component 的key
         unknown = set(component) - allowed
         if unknown:
             raise A2uiReverseConversionError(
@@ -151,6 +172,18 @@ def _parse_components(value: Any) -> dict[str, dict[str, Any]]:
             )
 
         children = component.get("children", [])
+        if component_type in forward._CONTAINER_TYPES and "children" not in component:
+            raise A2uiReverseConversionError(
+                f"{component_id}: container must contain the children field."
+            )
+        if component_type == "Button" and not children and "children" in component:
+            raise A2uiReverseConversionError(
+                f"{component_id}: empty children is not emitted for a leaf component."
+            )
+        if component_type not in {*forward._CONTAINER_TYPES, "Button"} and children:
+            raise A2uiReverseConversionError(
+                f"{component_id}: {component_type} cannot contain children."
+            )
         if not isinstance(children, list) or any(
             not isinstance(child, str) or not child for child in children
         ):
@@ -179,19 +212,7 @@ def _parse_components(value: Any) -> dict[str, dict[str, Any]]:
             raise A2uiReverseConversionError(
                 f"{component_id}: unsupported A2UI styles: {_names(unsupported_styles)}."
             )
-        if component_type in forward._CONTAINER_TYPES and "children" not in component:
-            raise A2uiReverseConversionError(
-                f"{component_id}: container must contain the children field."
-            )
-        if component_type not in forward._CONTAINER_TYPES and not children:
-            if "children" in component:
-                raise A2uiReverseConversionError(
-                    f"{component_id}: empty children is not emitted for a leaf component."
-                )
-        if component_type not in {*forward._CONTAINER_TYPES, "Button"} and children:
-            raise A2uiReverseConversionError(
-                f"{component_id}: {component_type} cannot contain children."
-            )
+
         if "onClick" in component:
             on_click = component["onClick"]
             if not isinstance(on_click, list) or not on_click or any(
@@ -207,12 +228,14 @@ def _validate_component_tree(
     root_id: Any,
     components: dict[str, dict[str, Any]],
 ) -> tuple[str, ...]:
-    """DFS 验证组件树"""
+    """DFS 验证children 组件树"""
     if root_id != "root":
         raise A2uiReverseConversionError('updateComponents.root must be "root".')
+
     root = components.get("root")
     if root is None or root.get("component") != "Column":
         raise A2uiReverseConversionError("The root Column component is missing.")
+
     parent_by_child: dict[str, str] = {}
     visiting: set[str] = set()
     visited: set[str] = set()
@@ -274,9 +297,8 @@ def parse_a2ui(a2ui: str | list[dict]) -> ParsedA2ui:
     )
 
     components_by_id = _parse_components(update["components"])
-    # components_by_id:dict  {'id':{}}  把其中的id 再提取出来作为key
+
     order = _validate_component_tree(update["root"], components_by_id)
-    # 检查root 内的children 关系
     return ParsedA2ui(
         version=version,
         surface_id=surface_ids[0],
