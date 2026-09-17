@@ -320,6 +320,8 @@ def _parse_components(value: Any) -> dict[str, dict[str, Any]]:
         context = f"component[{index}]"
         if not isinstance(component, dict):
             raise A2uiReverseConversionError(f"{context} must be an object.")
+        component = copy.deepcopy(component)
+        component.pop("accessibility", None)
         component_id = component.get("id")
         component_type = component.get("component")
         if not isinstance(component_id, str) or not component_id:
