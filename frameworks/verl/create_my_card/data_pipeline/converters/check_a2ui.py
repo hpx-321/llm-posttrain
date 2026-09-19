@@ -1,4 +1,22 @@
-from .common import ParsedA2ui
+from __future__ import annotations
+
+import copy
+import json
+from collections.abc import Mapping
+from typing import Any
+
+try:
+    from . import compact_dsl_a2ui_converter as forward
+    from .common import (
+        A2uiReverseConversionError,
+        ParsedA2ui,
+        _MESSAGE_KINDS,
+        _names,
+    )
+except ImportError:
+    import compact_dsl_a2ui_converter as forward
+    from common import A2uiReverseConversionError, ParsedA2ui, _MESSAGE_KINDS, _names
+
 
 def _normalize_a2ui_input(a2ui: str | list[dict],) -> list[str]:
     """统一输入格式,允许输入example 目录下两种数据格式"""
@@ -146,6 +164,8 @@ def _parse_components(value: Any) -> dict[str, dict[str, Any]]:
         if not isinstance(component, dict):
             raise A2uiReverseConversionError(f"{context} must be an object.")
 
+        component = copy.deepcopy(component)
+        component.pop("accessibility", None)
         component_id = component.get("id")
         component_type = component.get("component")
         if not isinstance(component_id, str) or not component_id:
@@ -308,5 +328,3 @@ def parse_a2ui(a2ui: str | list[dict]) -> ParsedA2ui:
         components_by_id=components_by_id,
         component_order=order,
     )
-
-

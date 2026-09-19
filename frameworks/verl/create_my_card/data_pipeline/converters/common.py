@@ -1,3 +1,36 @@
+from __future__ import annotations
+
+import json
+import sys
+from collections.abc import Sequence
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+_MESSAGE_KINDS = ("createSurface", "updateComponents", "updateDataModel")
+
+
+class A2uiReverseConversionError(ValueError):
+    """Raised when final A2UI is invalid or outside the reversible subset."""
+
+
+@dataclass(frozen=True)
+class ParsedA2ui:
+    """Validated three-message A2UI document."""
+
+    version: str
+    surface_id: str
+    create_surface: dict[str, Any]
+    update_components: dict[str, Any]
+    update_data_model: dict[str, Any]
+    components_by_id: dict[str, dict[str, Any]]
+    component_order: tuple[str, ...]
+
+
+def _names(values: set[str] | Sequence[str]) -> str:
+    return ", ".join(sorted(str(value) for value in values)) or "none"
+
+
 def _read_text(path: str) -> str:
     if path == "-":
         return sys.stdin.read()
